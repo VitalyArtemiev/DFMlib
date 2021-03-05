@@ -236,18 +236,7 @@ class Matrix {
         return result
     }
 
-    fun initNumber(): Number {
-        return when (mode) {
-            MatrixMode.mDouble -> {
-                0.0 //as Double - no cast needed
-            }
-            MatrixMode.mFraction -> {
-                Fraction()
-            }
-        }
-    }
-
-    fun initNumber(v: Int): Number {
+    fun initNumber(v: Int = 0): Number {
         return when (mode) {
             MatrixMode.mDouble -> {
                 v.toDouble() //as Double - no cast needed
@@ -256,6 +245,23 @@ class Matrix {
                 Fraction(v, 1)
             }
         }
+    }
+
+    fun gauss(): Pair<Matrix, Matrix> {
+        val L = Matrix(rows, cols, mode)
+        val U = Matrix(rows, cols, mode)
+
+        var A = copy()
+
+        var Ln = identity(rows, mode)
+        for (n in 0 until rows) {
+            for (i in n+1 until rows) {
+                Ln[i, n] = - A[i,n] / A[n, n]
+            }
+        }
+        
+
+        return Pair(L, U)
     }
 
     fun lud(): Pair<Matrix, Matrix> {
@@ -514,13 +520,9 @@ class Matrix {
 
 fun identity(size: Int, mode: MatrixMode): Matrix {
     val m = Matrix(size, size, mode)
-    when (mode) {
-        MatrixMode.mDouble -> for (i in 0 until size) {
-            m[i, i] = 1.0
-        }
-        MatrixMode.mFraction -> for (i in 0 until size) {
-            m[i, i] = Fraction(1, 1)
-        }
+
+    for (i in 0 until size) {
+        m[i, i] = m.initNumber(1)
     }
     return m
 }
