@@ -248,7 +248,7 @@ class Matrix {
     }
 
     fun gauss(): Pair<Matrix, Matrix> {
-        val L = Matrix(rows, cols, mode)
+        //val L = Matrix(rows, cols, mode)
         val U = Matrix(rows, cols, mode)
 
         var A = copy()
@@ -259,7 +259,8 @@ class Matrix {
                 Ln[i, n] = - A[i,n] / A[n, n]
             }
         }
-        
+
+        val L = A
 
         return Pair(L, U)
     }
