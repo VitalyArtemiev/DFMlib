@@ -21,7 +21,7 @@ fun randomMatrix (cols: Int, rows: Int, seed: Int = -1, mode: MatrixMode = Matri
 
 internal class MatrixTest {
     @Test
-    fun testGauss () {
+    fun testGaussFraction () {
         for (i in 2..6) {
             val fm = randomMatrix(i, i, mode = MatrixMode.mFraction)
             try {
@@ -30,7 +30,10 @@ internal class MatrixTest {
                 assertEquals(fm, fl * fu, "fl\n$fl\nfu\n$fu\n")
             } catch (e: LinearDependence) {continue}
         }
+    }
 
+    @Test
+    fun testGaussDouble () {
         for (i in 2..6) {
             val dm = randomMatrix(i, i, mode = MatrixMode.mDouble)
             try {

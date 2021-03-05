@@ -260,11 +260,11 @@ class Matrix {
         for (n in 0 until rows) {
             val Ln = identity(rows, mode)
 
-            if (A[n, n] == 0.0) {
+            if (A[n, n] == initNumber()) {
                 println("ACHTUNG")
 
                 var i = n + 1
-                while (i < rows && A[i, n] == 0.0) {
+                while (i < rows && A[i, n] == initNumber()) {
                     i++
                 }
 
