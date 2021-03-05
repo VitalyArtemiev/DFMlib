@@ -5,6 +5,9 @@ import kotlin.math.pow
 
 enum class MatrixMode { mDouble, mFraction }
 
+open class MatrixException(msg: String): Exception(msg)
+class LinearDependence(msg: String): MatrixException(msg)
+
 class Matrix {
     var a: Array2D
     var mode: MatrixMode
@@ -41,7 +44,7 @@ class Matrix {
                 val elements = line.dropLastWhile { it == '\t' || it == ' ' }.split(" ", "\t")
 
                 if (elements.size != cols)
-                    throw Exception("Invalid matrix: malformed columns")
+                    throw MatrixException("Invalid matrix: malformed columns")
 
                 for ((j, element) in elements.withIndex()) {
                     a[i, j] = Fraction.valueOf(element)
@@ -55,7 +58,7 @@ class Matrix {
                 val elements = line.dropLastWhile { it == '\t' || it == ' ' }.split(" ", "\t")
 
                 if (elements.size != cols)
-                    throw Exception("Invalid matrix: malformed columns")
+                    throw MatrixException("Invalid matrix: malformed columns")
 
                 for ((j, element) in elements.withIndex()) {
                     a[i, j] = element.toDouble()
@@ -247,256 +250,69 @@ class Matrix {
         }
     }
 
-    fun gauss(): Pair<Matrix, Matrix> {
-        //val L = Matrix(rows, cols, mode)
-        val U = Matrix(rows, cols, mode)
+    fun decomposeLU(): Pair<Matrix, Matrix> {
+        require(cols == rows) { "Square matrix required" }
+
+        var L = identity(rows, mode)
 
         var A = copy()
 
-        var Ln = identity(rows, mode)
         for (n in 0 until rows) {
-            for (i in n+1 until rows) {
-                Ln[i, n] = - A[i,n] / A[n, n]
+            val Ln = identity(rows, mode)
+
+            if (A[n, n] == 0.0) {
+                println("ACHTUNG")
+
+                var i = n + 1
+                while (i < rows && A[i, n] == 0.0) {
+                    i++
+                }
+
+                if (i <= rows) {
+                    throw LinearDependence("Matrix cannot be decomposed")
+                } else {
+                    A.swapRow(n, i)
+                }
             }
+
+            for (i in n+1 until rows) {
+                println(i)
+                println(A[n, n])
+                println()
+
+                check(A[n,n] != 0)
+
+                Ln[i, n] = - A[i, n] / A[n, n]
+            }
+
+            println("L$n")
+
+            println(Ln.toString())
+
+            println("A")
+
+            A = Ln * A
+
+            println(A.toString())
+
+            println()
+            L = L * Ln
         }
 
-        val L = A
+        val U = A
 
         return Pair(L, U)
     }
 
-    fun lud(): Pair<Matrix, Matrix> {
-        check(cols == rows) { "Square matrix required" }
-
-        val l = Matrix(rows, cols, mode)
-        val u = Matrix(rows, cols, mode)
-
-        for (i in 0 until rows) {
-            // Upper Triangular
-            for (k in i until rows) {
-
-                // Summation of L(i, j) * U(j, k)
-                var sum = initNumber()
-                for (j in 0 until i)
-                    sum += l[i, j] * u[j, k]
-
-                // Evaluating U(i, k)
-                u[i, k] = a[i, k] - sum
-            }
-
-            // r Triangular
-            for (k in i until rows) {
-                if (i == k)
-                    l[i, i] = initNumber(1) // Diagonal as 1
-                else {
-
-                    // Summation of L(k, j) * U(j, i)
-                    var sum = initNumber()
-                    for (j in 0 until i)
-                        sum += l[k, j] * u[j, i]
-
-                    // Evaluating L(k, i)
-                    l[k, i] = (a[k, i] - sum) / u[i, i]
-                }
-            }
-        }
-
-        return Pair(l, u)
-    }
-
-    fun LUDecompose(): Pair<Matrix, Matrix> {
-        val u = Matrix(rows, cols, mode)
-        val l = Matrix(rows, cols, mode)
-
-        for (i in 0 until l.rows) {
-            u.a[0, i] = a[0, i]
-            l.a[i, i] = initNumber(1)
-        }
-
-        for (i in 0 until u.rows) {
-            for (j in 0 until u.rows) {
-                var s = initNumber()
-                for (k in 0 until i) {
-                    s += l.a[i, k] * u.a[k, j]
-                }
-                u.a[i, j] = a[i, j] - s
-            }
-
-            for (j in i + 1 until u.rows) {
-                var s = initNumber()
-                for (k in 0 until i) {
-                    s += l.a[j, k] * u.a[k, i]
-                }
-
-                if (!u.a[i, i].isZero())
-                    l.a[j, i] = (a[j, i] - s) / u.a[i, i]
-                else
-                    l.a[j, i] = initNumber(1) //???
-            }
-        }
-
-        return Pair(l, u)
-    }
-
-    /* INPUT: A - array of pointers to rows of a square matrix having dimension N
- *        Tol - small tolerance number to detect failure when the matrix is near degenerate
- * OUTPUT: Matrix A is changed, it contains a copy of both matrices L-E and U as A=(L-E)+U such that P*A=L*U.
- *        The permutation matrix is not stored as a matrix, but in an integer vector P of size N+1
- *        containing column indexes where the permutation matrix has "1". The last element P[N]=S+N,
- *        where S is the number of row exchanges needed for determinant computation, det(P)=(-1)^S
- */
-    fun LUPDecompose(tolerance: Double = 0.01): Matrix {
-        check(rows == cols)
-        val result = this.copy()
-
-        val permutations = Array<Int>(rows + 1) { 0 }
-
-        //int i, j, k, imax;
-        //double maxA, *ptr, absA;
-
-        for (i in 0..rows) {
-            permutations[i] = i //Unit permutation matrix, permutations[rows] initialized with rows
-        }
-
-        for (i in 0 until rows) {
-            var maxA = initNumber()
-            var imax = i
-
-            for (k in i until rows) {
-                var absA = abs(a[k, i])
-                if (absA > maxA) {
-                    maxA = absA
-                    imax = k
-                }
-            }
-
-            //require(true)
-            //check(true)
-
-            check(maxA > tolerance) { "Matrix appears to be degenerate: $maxA" }
-
-            if (imax != i) {
-                //pivoting permutations
-                var j = permutations[i]
-                permutations[i] = permutations[imax]
-                permutations[imax] = j
-
-                //pivoting rows of a
-                result.a[i] = a[imax]
-                result.a[imax] = a[i]
-
-                //counting pivots starting from rows (for determinant)
-                permutations[rows]++
-            }
-
-            for (j in i + 1 until rows) {
-                result.a[j, i] /= result.a[i, i]
-
-                for (k in i + 1 until rows)
-                    result.a[j, k] -= result.a[j, i] * result.a[i, k]
-            }
-        }
-
-        return result
-    }
-
-/* INPUT: A,P filled in LUPDecompose; b - rhs vector; N - dimension
- * OUTPUT: x - solution vector of A*x=b
- */
-    /*void LUPSolve(double **A, int *P, double *b, int N, double *x) {
-
-        for (int i = 0; i < N; i++) {
-            x[i] = b[P[i]];
-
-            for (int k = 0; k < i; k++)
-            x[i] -= A[i][k] * x[k];
-        }
-
-        for (int i = N - 1; i >= 0; i--) {
-            for (int k = i + 1; k < N; k++)
-            x[i] -= A[i][k] * x[k];
-
-            x[i] = x[i] / A[i][i];
-        }
-    }
-
-*//* INPUT: A,P filled in LUPDecompose; N - dimension
- * OUTPUT: IA is the inverse of the initial matrix
- *//*
-    void LUPInvert(double **A, int *P, int N, double **IA) {
-
-        for (int j = 0; j < N; j++) {
-            for (int i = 0; i < N; i++) {
-            if (P[i] == j)
-                IA[i][j] = 1.0;
-            else
-                IA[i][j] = 0.0;
-
-            for (int k = 0; k < i; k++)
-            IA[i][j] -= A[i][k] * IA[k][j];
-        }
-
-            for (int i = N - 1; i >= 0; i--) {
-            for (int k = i + 1; k < N; k++)
-            IA[i][j] -= A[i][k] * IA[k][j];
-
-            IA[i][j] = IA[i][j] / A[i][i];
-        }
-        }
-    }
-
-*//* INPUT: A,P filled in LUPDecompose; N - dimension.
- * OUTPUT: Function returns the determinant of the initial matrix
- *//*
-    double LUPDeterminant(double **A, int *P, int N) {
-
-        double det = A[0][0];
-
-        for (int i = 1; i < N; i++)
-        det *= A[i][i];
-
-        if ((P[N] - N) % 2 == 0)
-            return det;
-        else
-            return -det;
-    }*/
-
     fun det(): Number {
         check(cols == rows) { "Square matrix required" }
-        val a: Matrix = copy()
 
-        for (i in 0 until a.cols)
-        //this ignores extra rows
-        {
-            for (j in i until a.cols) {
-                var s = initNumber()
-                for (k in 0 until i) {
-                    s += a.a[i, k] * a.a[k, j]
-                }
-                a.a[i, j] = a.a[i, j] - s
-            }
+        val (l, u) = decomposeLU()
 
-            for (j in i + 1 until a.cols) {
-                var s = initNumber()
-                for (k in 0 until i) {
-                    s += a.a[j, k] * a.a[k, i]
-                }
-
-                if (!a.a[i, i].isZero())
-                    a.a[j, i] = (a.a[j, i] - s) / a.a[i, i]
-                else
-                    a.a[j, i] = initNumber()
-            }
+        var result = u[0,0]
+        for (i in 1 until cols) {
+            result *= u[i,i]
         }
-
-        var result = initNumber(1)
-
-        for (i in 0 until a.cols) {
-            result *= a.a[i, i]
-        }
-
-        println(a.toString())
-        println()
 
         return if (mode == MatrixMode.mDouble) {
             if (result == -0.0) //apparently -0.0 != +0.0 but only sometimes

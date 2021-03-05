@@ -339,7 +339,7 @@ class Fraction: Number {
         }
 
         if (num * sign < 0) {
-            println("Warning: sign mismatch!!!")//todo: triggers in tests. problem?
+            //println("Warning: sign mismatch!!!")//todo: triggers in tests. problem?
             sign *= -1
         }
 

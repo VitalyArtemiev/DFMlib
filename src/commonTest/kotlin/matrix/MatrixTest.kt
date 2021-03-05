@@ -8,7 +8,39 @@ fun <T> testMatrix() {
 
 }
 
+fun randomMatrix (cols: Int, rows: Int, seed: Int = -1, mode: MatrixMode = MatrixMode.mDouble): Matrix {
+    val m = Matrix(cols, rows, mode)
+
+    for (i in 0 until rows)
+        for (j in 0 until cols) {
+            m[i, j] = m.initNumber(Random(seed).nextInt(-5, 5))
+        }
+
+    return m
+}
+
 internal class MatrixTest {
+    @Test
+    fun testGauss () {
+        for (i in 2..6) {
+            val fm = randomMatrix(i, i, mode = MatrixMode.mFraction)
+            try {
+                val (fl, fu) = fm.decomposeLU()
+
+                assertEquals(fm, fl * fu, "fl\n$fl\nfu\n$fu\n")
+            } catch (e: LinearDependence) {continue}
+        }
+
+        for (i in 2..6) {
+            val dm = randomMatrix(i, i, mode = MatrixMode.mDouble)
+            try {
+                val (dl, du) = dm.decomposeLU()
+
+                assertEquals(dm, dl * du, "dl\n$dl\ndu\n$du\n")
+            } catch (e: LinearDependence) {continue}
+        }
+    }
+
     @Test
     fun testDoubleMatrix () {
         var m = Matrix(4, 5)
@@ -181,20 +213,20 @@ internal class MatrixTest {
         fm = m2.toFractionMatrix()
         assertEquals("0/1 0/1 0/1\n-1/1 -2/1 3/1\n4/1 8/1 -12/1", fm.toString())
 
-        assertEquals(I, I.LUDecompose().first)
-        assertEquals(I, I.LUDecompose().second)
+        assertEquals(I, I.decomposeLU().first)
+        assertEquals(I, I.decomposeLU().second)
 
-        val (L, U) = m2.lud()
+        val (L, U) = m2.decomposeLU()
 
-        val r = m2.LUPDecompose()
+        val r = m2.decomposeLU()
 
         println("LUP")
 
         println(r.toString())
 
-        //assertEquals(L * U, m2)
-        //assertEquals("1.0 0.0 0.0\n0.0 1.0 0.0\n-4.0 0.0 1.0", L.toString())
-        //assertEquals("-1.0 -2.0 3.0\n0.0 0.0 0.0\n0.0 0.0 0.0", U.toString())
+        assertEquals(m2, L * U)
+        assertEquals("1.0 0.0 0.0\n0.0 1.0 0.0\n-4.0 0.0 1.0", L.toString())
+        assertEquals("-1.0 -2.0 3.0\n0.0 0.0 0.0\n0.0 0.0 0.0", U.toString())
 
         var det = I.det()
         assertEquals(1.0, det)
