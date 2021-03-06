@@ -50,6 +50,12 @@ operator fun Number.times(a: Number): Number {
     if (this is Double && a is Double)
         return this * a
 
+    if (this is Fraction && a is Int)
+        return this * a
+
+    if (this is Double && a is Int)
+        return this * a
+
     throw Exception("Not implemented")
 }
 

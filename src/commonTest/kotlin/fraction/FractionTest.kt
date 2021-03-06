@@ -35,6 +35,12 @@ internal class FractionTest {
         a *= 2
         assertTrue(f.equals(-5), "Equals for int is broken")
 
+        a = Fraction(1, 1) * Fraction(1, 2) * Fraction(1, 1)
+        assertEquals("1/2", a.toStringFactorized())
+
+        a = Fraction(5, 2) * Fraction(1, 3)
+        assertEquals("5/2*3", a.toStringFactorized())
+
         a = Fraction(5, 6)
         var b = a.copy()
         assertTrue(a.equals(b), "Equals with fraction is broken")
@@ -211,8 +217,24 @@ internal class FractionTest {
         assertEquals(d, e)
 
         var dd: Double = 15.67
-        println(dd.toByte())
-        println(dd.toInt())
-        println(dd.toChar())
+        //println(dd.toByte())
+        //println(dd.toInt())
+        //println(dd.toChar())
+
+        a = Fraction(1, 1)
+
+        b = a * a * a * a * a
+        assertEquals("1/1", b.toStringFactorized())
+
+        b = a / a / a / a / a
+        assertEquals("1/1", b.toStringFactorized())
+
+        a = Fraction(1, 2)
+
+        b = a * a * a * a * a
+        assertEquals("1/2*2*2*2*2", b.toStringFactorized())
+
+        b = a / a / a / a / a
+        assertEquals("2*2*2/1", b.toStringFactorized())
     }
 }

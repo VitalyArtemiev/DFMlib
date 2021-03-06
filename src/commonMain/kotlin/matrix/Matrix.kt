@@ -250,68 +250,63 @@ class Matrix {
         }
     }
 
-    fun decomposeLU(): Pair<Matrix, Matrix> {
+    fun decomposeLU(): Triple<Matrix, Matrix, Int> {
         require(cols == rows) { "Square matrix required" }
 
         var L = identity(rows, mode)
 
         var A = copy()
 
+        var p = 1
+
         for (n in 0 until rows) {
             val Ln = identity(rows, mode)
 
             if (A[n, n] == initNumber()) {
-                println("ACHTUNG")
-
                 var i = n + 1
                 while (i < rows && A[i, n] == initNumber()) {
                     i++
                 }
 
-                if (i <= rows) {
-                    throw LinearDependence("Matrix cannot be decomposed")
+                if (i == rows) {
+                    throw LinearDependence("Matrix cannot be decomposed:\n$this\n")
                 } else {
+                    p *= -1
                     A.swapRow(n, i)
                 }
             }
 
             for (i in n+1 until rows) {
-                println(i)
-                println(A[n, n])
-                println()
-
                 check(A[n,n] != 0)
 
                 Ln[i, n] = - A[i, n] / A[n, n]
             }
 
-            println("L$n")
-
-            println(Ln.toString())
-
-            println("A")
-
             A = Ln * A
 
-            println(A.toString())
-
-            println()
             L = L * Ln
         }
 
         val U = A
 
-        return Pair(L, U)
+        return Triple(L, U, p)
     }
 
     fun det(): Number {
         check(cols == rows) { "Square matrix required" }
 
-        val (l, u) = decomposeLU()
+        var result = try {
+            val (l, u, p) = decomposeLU()
 
-        var result = u[0,0]
-        for (i in 1 until cols) {
-            result *= u[i,i]
+            var r = u[0, 0] * p
+            for (i in 1 until cols) {
+                r *= u[i,i]
+            }
+            r
+        } catch (e: LinearDependence) {
+            println(e.message)
+
+            initNumber()
         }
 
         return if (mode == MatrixMode.mDouble) {

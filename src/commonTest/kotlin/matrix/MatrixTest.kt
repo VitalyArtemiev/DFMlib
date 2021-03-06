@@ -8,8 +8,8 @@ fun <T> testMatrix() {
 
 }
 
-fun randomMatrix (cols: Int, rows: Int, seed: Int = -1, mode: MatrixMode = MatrixMode.mDouble): Matrix {
-    val m = Matrix(cols, rows, mode)
+fun randomMatrix (rows: Int, cols: Int, seed: Int = -1, mode: MatrixMode = MatrixMode.mDouble): Matrix {
+    val m = Matrix(rows, cols, mode)
 
     for (i in 0 until rows)
         for (j in 0 until cols) {
@@ -22,7 +22,7 @@ fun randomMatrix (cols: Int, rows: Int, seed: Int = -1, mode: MatrixMode = Matri
 internal class MatrixTest {
     @Test
     fun testGaussFraction () {
-        for (i in 2..6) {
+        for (i in 1..6) {
             val fm = randomMatrix(i, i, mode = MatrixMode.mFraction)
             try {
                 val (fl, fu) = fm.decomposeLU()
@@ -34,13 +34,32 @@ internal class MatrixTest {
 
     @Test
     fun testGaussDouble () {
-        for (i in 2..6) {
-            val dm = randomMatrix(i, i, mode = MatrixMode.mDouble)
+        for (i in 1..6) {
+            val m = randomMatrix(i, i, mode = MatrixMode.mDouble)
             try {
-                val (dl, du) = dm.decomposeLU()
+                val (l, u) = m.decomposeLU()
 
-                assertEquals(dm, dl * du, "dl\n$dl\ndu\n$du\n")
+                assertEquals(m, l * u, "dl\n$l\ndu\n$u\n")
             } catch (e: LinearDependence) {continue}
+        }
+    }
+
+    @Test
+    fun testSerialization() {
+        for (j in 1..6) {
+            for (i in 1..6) {
+                val m1 = randomMatrix(j, i, mode = MatrixMode.mDouble)
+                val m2 = Matrix(m1.toString())
+
+                assertEquals(m1, m2)
+            }
+
+            for (i in 1..6) {
+                val m1 = randomMatrix(j, i, mode = MatrixMode.mFraction)
+                val m2 = Matrix(m1.toString())
+
+                assertEquals(m1, m2)
+            }
         }
     }
 
@@ -219,18 +238,6 @@ internal class MatrixTest {
         assertEquals(I, I.decomposeLU().first)
         assertEquals(I, I.decomposeLU().second)
 
-        val (L, U) = m2.decomposeLU()
-
-        val r = m2.decomposeLU()
-
-        println("LUP")
-
-        println(r.toString())
-
-        assertEquals(m2, L * U)
-        assertEquals("1.0 0.0 0.0\n0.0 1.0 0.0\n-4.0 0.0 1.0", L.toString())
-        assertEquals("-1.0 -2.0 3.0\n0.0 0.0 0.0\n0.0 0.0 0.0", U.toString())
-
         var det = I.det()
         assertEquals(1.0, det)
 
@@ -271,10 +278,9 @@ internal class MatrixTest {
                     "9\t56\t8\t3\t1\t4\n" +
                     "0\t5\t7\t34\t2\t6"
         )
-        //det = m1.det()
+        det = m1.det()
 
         assertEquals(4369152.0, det)
-
 
 
         assertEquals(I, I.transpose())

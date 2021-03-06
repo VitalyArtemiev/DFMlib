@@ -43,7 +43,7 @@ class Fraction: Number {
     var numerator: IntList
     var denominator: IntList
     var num: Int = 0
-    var den: Int = 0
+    var den: Int = 1
 
     var sign = 1
 
@@ -51,14 +51,10 @@ class Fraction: Number {
         get() = num == 0
 
     constructor() {
-        num = 0
-        den = 1
-
         numerator = IntList(0)
         denominator = IntList(1)
     }
 
-    //@Throws(NumberFormatException::class)
     constructor(num: Int, den: Int = 1) {
         this.num = num
         this.den = den
@@ -73,14 +69,22 @@ class Fraction: Number {
             this.den = abs(this.den)
         }
 
-        numerator = factorize(this.num)
-        denominator = factorize(this.den)
-        simplify()
+        if (num == 0) {
+            this.den = 1
+            numerator = IntList(0)
+            denominator = IntList(1)
+            return
+        } else {
+            numerator = factorize(this.num)
+            denominator = factorize(this.den)
+            simplify()
+        }
     }
 
     private inline fun handleZero(): Boolean {
         return if (num == 0) {
             den = 1
+            sign = 1
             numerator.clear()
             numerator.add(0)
             denominator.clear()
@@ -144,8 +148,10 @@ class Fraction: Number {
     }
 
     fun negate() {
-        num *= -1
-        sign *= -1
+        if (num !=0) {
+            num *= -1
+            sign *= -1
+        }
         //numerator.addSorted(-1);
         //simplify(); todo: possible error
     }
@@ -219,6 +225,11 @@ class Fraction: Number {
 
     fun add(a: Int) {
         num += a * den
+
+        if (handleZero()) {
+            return
+        }
+
         numerator.clear()
         numerator = factorize(num)
         simplify()
@@ -226,6 +237,11 @@ class Fraction: Number {
 
     fun subtract(a: Int) {
         num -= a * den
+
+        if (handleZero()) {
+            return
+        }
+
         numerator.clear()
         numerator = factorize(num)
         simplify()
@@ -234,13 +250,7 @@ class Fraction: Number {
     fun multiply(a: Int) {
         num *= a
 
-        if (num == 0) {
-            den = 1
-            numerator.clear()
-            numerator.add(0)
-            denominator.clear()
-            denominator.add(1)
-            sign = 1
+        if (handleZero()) {
             return
         }
 
@@ -333,19 +343,11 @@ class Fraction: Number {
 
     fun simplify() {
         if (den < 0) {
-            sign *= -1
             num *= -1
             den = abs(den)
         }
 
-        if (num * sign < 0) {
-            //println("Warning: sign mismatch!!!")//todo: triggers in tests. problem?
-            sign *= -1
-        }
-
-        if (num == 1 || den == 1) {
-            return
-        }
+        sign = num.sign
 
         if (num == den) {
             num = 1
@@ -355,6 +357,14 @@ class Fraction: Number {
             denominator.clear()
             denominator.add(1)
             return
+        }
+
+        while (numerator.memberCount > 1 && numerator.root!!.value == 1) {
+            numerator.deleteFirst()
+        }
+
+        while (denominator.memberCount > 1 && denominator.root!!.value == 1) {
+            denominator.deleteFirst()
         }
 
         var cn = numerator.root   //current
@@ -383,20 +393,20 @@ class Fraction: Number {
             }
 
             if (cn.value == cd.value) {
-                if (pn != null) {
+                cn = if (pn != null) {
                     numerator.deleteNext(pn)
-                    cn = pn.next
+                    pn.next
                 } else {
                     numerator.deleteFirst()
-                    cn = numerator.root
+                    numerator.root
                 }
 
-                if (pd != null) {
+                cd = if (pd != null) {
                     denominator.deleteNext(pd)
-                    cd = pd.next
+                    pd.next
                 } else {
                     denominator.deleteFirst()
-                    cd = denominator.root
+                    denominator.root
                 }
             } else {
                 pn = cn
@@ -407,6 +417,7 @@ class Fraction: Number {
         if (numerator.memberCount == 0) {
             numerator.add(1)
         }
+
         if (denominator.memberCount == 0) {
             denominator.add(1)
         }
