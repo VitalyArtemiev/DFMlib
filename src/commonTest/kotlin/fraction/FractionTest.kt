@@ -4,6 +4,17 @@ import kotlin.test.*
 
 internal class FractionTest {
     @Test
+    fun overflowTest() {
+        var f = Fraction(Int.MAX_VALUE,1)
+        f = f + 2
+        assertEquals("${Int.MAX_VALUE + 2L}/1", f.toString())
+
+        f = Fraction(1, Int.MAX_VALUE)
+        f = f / 2
+        assertEquals("1/${Int.MAX_VALUE * 2L}", f.toString())
+    }
+
+    @Test
     fun test() {
         var f = Fraction(256, 14)
 

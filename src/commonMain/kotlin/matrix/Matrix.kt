@@ -21,12 +21,12 @@ class Matrix {
         cols = c
         mode = m
 
-        when (mode) {
+        a = when (mode) {
             MatrixMode.mDouble -> {
-                a = Array2DDouble(rows, cols)
+                Array2DDouble(rows, cols)
             }
             MatrixMode.mFraction -> {
-                a = Array2DFraction(rows, cols)
+                Array2DFraction(rows, cols)
             }
         }
     }
@@ -250,18 +250,16 @@ class Matrix {
         }
     }
 
-    fun decomposeLU(): Triple<Matrix, Matrix, Int> {
+    fun decomposeLU(): Triple<Matrix, Matrix, Matrix> {
         require(cols == rows) { "Square matrix required" }
 
-        var L = identity(rows, mode)
+        val L = identity(rows, mode)
 
         var A = copy()
 
-        var p = 1
+        val P = identity(rows, mode)
 
         for (n in 0 until rows) {
-            val Ln = identity(rows, mode)
-
             if (A[n, n] == initNumber()) {
                 var i = n + 1
                 while (i < rows && A[i, n] == initNumber()) {
@@ -271,25 +269,26 @@ class Matrix {
                 if (i == rows) {
                     throw LinearDependence("Matrix cannot be decomposed:\n$this\n")
                 } else {
-                    p *= -1
+                    P.swapRow(n, i)
                     A.swapRow(n, i)
                 }
             }
 
+            val Ln = identity(rows, mode)
+
             for (i in n+1 until rows) {
-                check(A[n,n] != 0)
+                val l = A[i, n] / A[n, n]
 
-                Ln[i, n] = - A[i, n] / A[n, n]
+                Ln[i, n] = - l
+
+                L[i, n] = l
             }
-
             A = Ln * A
-
-            L = L * Ln
         }
 
         val U = A
 
-        return Triple(L, U, p)
+        return Triple(L, U, P)
     }
 
     fun det(): Number {
@@ -298,8 +297,11 @@ class Matrix {
         var result = try {
             val (l, u, p) = decomposeLU()
 
-            var r = u[0, 0] * p
+            var r = u[0, 0]
             for (i in 1 until cols) {
+                if (p[i, i] == initNumber()) {
+                    r *= -1
+                }
                 r *= u[i,i]
             }
             r
@@ -313,7 +315,7 @@ class Matrix {
             if (result == -0.0) //apparently -0.0 != +0.0 but only sometimes
                 result = 0.0
 
-            roundP(result as Double, precision)
+            (result as Double).round(precision)
         } else
             result as Fraction
     }
@@ -327,6 +329,20 @@ class Matrix {
             }
         }
         return result
+    }
+
+    fun roundToPrecision(): Matrix {
+        if (mode == MatrixMode.mFraction){
+            return this
+        }
+
+        for (i in 0 until rows) {
+            for (j in 0 until cols) {
+                this[i, j] = (this[i, j] as Double).round(precision)
+            }
+        }
+
+        return this
     }
 }
 

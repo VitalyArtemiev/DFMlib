@@ -10,12 +10,12 @@ class IntList(vararg values: Int) {
     var memberCount = 0
     internal var root: IntMember? = null
 
-    private var prod: Int = 0
+    private var prod: Long = 0
     private var prodReady = false
 
     inner class IntMember(var value: Int, var next: IntMember? = null)
 
-    fun product(): Int {
+    fun product(): Long {
         if (prodReady)
             return prod
 

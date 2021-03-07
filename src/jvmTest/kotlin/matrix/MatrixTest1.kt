@@ -1,15 +1,12 @@
 package matrix
-/*
+
+import org.junit.jupiter.api.Assertions.*
+
 import kotlin.test.*
 import kotlin.random.Random
 
-//import org.junit.jupiter.api.Assertions.*
 
 import fraction.*
-
-fun <T> testMatrix() {
-
-}
 
 fun randomMatrix (rows: Int, cols: Int, seed: Int = -1, mode: MatrixMode = MatrixMode.mDouble): Matrix {
     val m = Matrix(rows, cols, mode)
@@ -22,7 +19,7 @@ fun randomMatrix (rows: Int, cols: Int, seed: Int = -1, mode: MatrixMode = Matri
     for (i in 0 until rows)
         for (j in 0 until cols) {
             seed++
-            m[i, j] = m.initNumber(Random(seed).nextInt(-20, 20))
+            m[i, j] = m.initNumber(Random(seed).nextInt(-50, 50))
         }
 
     return m
@@ -80,18 +77,18 @@ internal class MatrixTest {
                 println("$l\n\n$u")
 
                 for (j in 0 until i) {
-                    assertEquals(1.0, l[j, j], "$l\nrow:$j col:$j")
+                    assertEquals(1.0, l[j, j] as Double, 0.000000000001, "$l\nrow:$j col:$j")
 
                     //u.roundToPrecision()
 
                     for (k in 0 until j){
-                        assertEquals(.0, u[j, k], "$u\nrow:$j col:$k")
+                        assertEquals(.0, u[j, k] as Double, 0.000000000001, "$u\nrow:$j col:$k")
                     }
 
                     //l.roundToPrecision()
 
                     for (k in j+1 until i){
-                        assertEquals(.0, l[j, k], "$l\nrow:$j col:$k")
+                        assertEquals(.0, l[j, k] as Double, 0.000000000001, "$l\nrow:$j col:$k")
                     }
                 }
 
@@ -222,8 +219,8 @@ internal class MatrixTest {
         assertEquals(7.5, m.a[1, 2])
         assertEquals(8.5, m.a[1, 3])
         assertEquals(9.5, m.a[2, 0])
-        assertEquals(10.0,m.a[2, 1])
-        assertEquals(-2.0,m.a[2, 2])
+        assertEquals(10.0, m.a[2, 1])
+        assertEquals(-2.0, m.a[2, 2])
         assertEquals(0.0, m.a[2, 3])
 
         s = "1 2\t \n" +
@@ -405,4 +402,4 @@ internal class MatrixTest {
 
         assertEquals(Fraction(4369152, 1), det)
     }
-}*/
+}

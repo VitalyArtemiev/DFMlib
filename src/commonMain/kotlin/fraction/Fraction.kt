@@ -25,7 +25,7 @@ class Fraction: Number {
     }
 
     override fun toInt(): Int {
-        return num / den
+        return (num / den).toInt()
     }
 
     override fun toLong(): Long {
@@ -42,13 +42,13 @@ class Fraction: Number {
 
     var numerator: IntList
     var denominator: IntList
-    var num: Int = 0
-    var den: Int = 1
+    var num: Long = 0
+    var den: Long = 1
 
     var sign = 1
 
     val isZero: Boolean
-        get() = num == 0
+        get() = num == 0L
 
     constructor() {
         numerator = IntList(0)
@@ -56,11 +56,11 @@ class Fraction: Number {
     }
 
     constructor(num: Int, den: Int = 1) {
-        this.num = num
-        this.den = den
+        this.num = num.toLong()
+        this.den = den.toLong()
 
         //require(den != 0) {}
-        if (this.den == 0) {
+        if (this.den == 0L) {
             throw NumberFormatException("denominator cannot be null")
         }
 
@@ -82,7 +82,7 @@ class Fraction: Number {
     }
 
     private inline fun handleZero(): Boolean {
-        return if (num == 0) {
+        return if (num == 0L) {
             den = 1
             sign = 1
             numerator.clear()
@@ -94,7 +94,7 @@ class Fraction: Number {
             false
     }
 
-    private fun factorize(number: Int): IntList {
+    private fun factorize(number: Long): IntList {
         sign *= number.sign
         if (sign == 0)
             sign = 1
@@ -104,7 +104,7 @@ class Fraction: Number {
         val factors = IntList()
         var i = 2
         while (i <= n / i) {
-            while (n % i == 0) {
+            while (n % i == 0L) {
                 factors.add(i)
                 n /= i
             }
@@ -118,7 +118,7 @@ class Fraction: Number {
             }
         }*/
         if (n > 1) {
-            factors.add(n)
+            factors.add(n.toInt())//todo: potential conversion problem
         }
         return factors
     }
@@ -139,7 +139,7 @@ class Fraction: Number {
                 num == other.num && den == other.den
             }
             is Int -> {
-                num == other && den == 1
+                num == other && den == 1L
             }
             else -> {
                 false
@@ -148,7 +148,7 @@ class Fraction: Number {
     }
 
     fun negate() {
-        if (num !=0) {
+        if (num != 0L) {
             num *= -1
             sign *= -1
         }
@@ -213,7 +213,7 @@ class Fraction: Number {
         num *= f.den
         den *= f.num
 
-        if (den == 0) {
+        if (den == 0L) {
             throw NumberFormatException("Division by zero")
         }
 
@@ -254,18 +254,18 @@ class Fraction: Number {
             return
         }
 
-        numerator.addSorted(factorize(a))
+        numerator.addSorted(factorize(a.toLong()))
         simplify()
     }
 
     fun divide(a: Int) {
         den *= a
 
-        if (den == 0) {
+        if (den == 0L) {
             throw NumberFormatException("Division by zero")
         }
 
-        denominator.addSorted(factorize(a))
+        denominator.addSorted(factorize(a.toLong()))
         simplify()
     }
 
@@ -422,15 +422,15 @@ class Fraction: Number {
             denominator.add(1)
         }
 
-        num = sign * numerator.product()
-        den = denominator.product()
+        num = (sign * numerator.product()).toLong()
+        den = (denominator.product()).toLong()
     }
 
     fun toStringTruncated(): String {
-        if (num == 0) {
+        if (num == 0L) {
             return "0"
         }
-        if (den == 1) {
+        if (den == 1L) {
             return num.toString()
         }
         return toString()

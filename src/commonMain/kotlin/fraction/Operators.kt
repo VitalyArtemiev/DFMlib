@@ -87,7 +87,7 @@ operator fun Number.compareTo(b: Number): Int {
     val result = this - b
     return when (result) {
         is Fraction -> {
-            if (result.num == 0) {
+            if (result.num == 0L) {
                 0
             } else {
                 result.sign
@@ -120,7 +120,9 @@ fun Number.roundP(p: Int = 100000): Number {
     throw Exception("Not implemented")
 }
 
-fun roundP(x: Double, p: Int = 100000) = round(x * p) / p
+fun Double.round(precision: Int): Double {
+    return round(this * precision) / precision
+}
 
 fun abs(a: Number): Number {
     return when (a) {

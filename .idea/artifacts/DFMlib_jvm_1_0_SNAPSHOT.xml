@@ -1,6 +1,8 @@
 <component name="ArtifactManager">
   <artifact type="jar" name="DFMlib-jvm-1.0-SNAPSHOT">
-    <output-path>$PROJECT_DIR$/build/libs</output-path>
-    <root id="archive" name="DFMlib-jvm-1.0-SNAPSHOT.jar" />
+    <output-path>D:\Documents\Projects\DFMlib\build\libs</output-path>
+    <root id="archive" name="DFMlib-jvm-1.0-SNAPSHOT.jar">
+      <element id="module-output" name="DFMlib.jvmMain" />
+    </root>
   </artifact>
 </component>
