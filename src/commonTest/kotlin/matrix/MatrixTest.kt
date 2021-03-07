@@ -1,15 +1,11 @@
 package matrix
-/*
-import kotlin.test.*
-import kotlin.random.Random
 
 //import org.junit.jupiter.api.Assertions.*
 
 import fraction.*
-
-fun <T> testMatrix() {
-
-}
+import kotlin.random.Random
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
 fun randomMatrix (rows: Int, cols: Int, seed: Int = -1, mode: MatrixMode = MatrixMode.mDouble): Matrix {
     val m = Matrix(rows, cols, mode)
@@ -79,19 +75,18 @@ internal class MatrixTest {
 
                 println("$l\n\n$u")
 
+                val U = u.copy().roundToPrecision() //copy to avoid losing precision in original matrices
+                val L = l.copy().roundToPrecision()
+
                 for (j in 0 until i) {
-                    assertEquals(1.0, l[j, j], "$l\nrow:$j col:$j")
+                    assertEquals(1.0, L[j, j], "$L\nrow:$j col:$j")
 
-                    //u.roundToPrecision()
-
-                    for (k in 0 until j){
-                        assertEquals(.0, u[j, k], "$u\nrow:$j col:$k")
+                    for (k in 0 until j) {
+                        assertEquals(.0, U[j, k], "$U\nrow:$j col:$k")
                     }
 
-                    //l.roundToPrecision()
-
-                    for (k in j+1 until i){
-                        assertEquals(.0, l[j, k], "$l\nrow:$j col:$k")
+                    for (k in j + 1 until i) {
+                        assertEquals(.0, L[j, k], "$L\nrow:$j col:$k")
                     }
                 }
 
@@ -138,7 +133,7 @@ internal class MatrixTest {
         assertEquals(MatrixMode.mDouble, m.mode)
         assertEquals(1.5, m.a[0, 0])
 
-        var a = m.a[0,0] - 1.0
+        val a = m.a[0, 0] - 1.0
         assertEquals(0.5, a)
 
         s = "1.5 2.5"
@@ -259,7 +254,7 @@ internal class MatrixTest {
         assertEquals(m + 1.0, 1.0 + m)
         assertEquals(m1 * 2.0, 2.0 * m1)
 
-        var I = identity(3, MatrixMode.mDouble)
+        val I = identity(3, MatrixMode.mDouble)
         assertEquals(3, I.rows)
         assertEquals(3, I.cols)
         assertEquals(1.0, I[0, 0])
@@ -323,7 +318,7 @@ internal class MatrixTest {
         m1 = Matrix("1 2 4\n4 -5 6\n7 8 9")
         det = m1.det()
 
-        var d: Double = 187.0
+        val d = 187.0
         assertEquals(d, det)
 
         m1 = Matrix("1 2\n3 4")
@@ -401,8 +396,8 @@ internal class MatrixTest {
                     "9\t56\t8\t3\t1\t4\n" +
                     "0\t5\t7\t34\t2\t6"
         )
-        var det = m1.det()
+        val det = m1.det()
 
         assertEquals(Fraction(4369152, 1), det)
     }
-}*/
+}

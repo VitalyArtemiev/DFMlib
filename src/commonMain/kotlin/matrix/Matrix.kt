@@ -104,8 +104,6 @@ class Matrix {
         val t = a[r2]
         a[r2] = a[r1]
         a[r1] = t
-        /*for i= 0 to Col - 1 do
-  a[r1, i]*= -1; //change sign so to not change det  */
     }
 
     fun copy(): Matrix {
@@ -294,16 +292,23 @@ class Matrix {
     fun det(): Number {
         check(cols == rows) { "Square matrix required" }
 
+        var pZeroCount = 0
+
         var result = try {
-            val (l, u, p) = decomposeLU()
+            val (_, u, p) = decomposeLU()
 
             var r = u[0, 0]
             for (i in 1 until cols) {
                 if (p[i, i] == initNumber()) {
-                    r *= -1
+                    pZeroCount++ //counting number of zeros on main diagonal
                 }
-                r *= u[i,i]
+                r *= u[i, i]
             }
+
+            if (pZeroCount / 2 % 2 != 0) { //number of permutations is half that the count of zeros
+                r *= (-1)
+            }
+
             r
         } catch (e: LinearDependence) {
             println(e.message)
@@ -339,6 +344,9 @@ class Matrix {
         for (i in 0 until rows) {
             for (j in 0 until cols) {
                 this[i, j] = (this[i, j] as Double).round(precision)
+                if (this[i, j] == -0.0) {
+                    this[i, j] = 0.0
+                }
             }
         }
 

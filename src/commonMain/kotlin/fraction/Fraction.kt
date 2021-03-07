@@ -29,7 +29,7 @@ class Fraction: Number {
     }
 
     override fun toLong(): Long {
-        return (num / den).toLong()
+        return (num / den)
     }
 
     override fun toShort(): Short {
@@ -139,12 +139,16 @@ class Fraction: Number {
                 num == other.num && den == other.den
             }
             is Int -> {
-                num == other && den == 1L
+                num == other.toLong() && den == 1L
             }
             else -> {
                 false
             }
         }
+    }
+
+    override fun hashCode(): Int {
+        return toString().hashCode()
     }
 
     fun negate() {
@@ -422,8 +426,8 @@ class Fraction: Number {
             denominator.add(1)
         }
 
-        num = (sign * numerator.product()).toLong()
-        den = (denominator.product()).toLong()
+        num = sign * numerator.product()
+        den = denominator.product()
     }
 
     fun toStringTruncated(): String {
