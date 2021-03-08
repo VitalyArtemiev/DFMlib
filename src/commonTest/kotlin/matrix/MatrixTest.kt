@@ -31,18 +31,17 @@ internal class MatrixTest {
 
         assertEquals(-2.0, m.det())
 
-        val (l, u, p) = m.decomposeLU()
+        val (l, u, p) = m.decomposeLUP()
 
         assertEquals(m, p * l * u)
     }
-
 
     @Test
     fun testGaussFraction () {
         for (i in 1..6) {
             val m = randomMatrix(i, i, mode = MatrixMode.mFraction)
             try {
-                val (l, u, p) = m.decomposeLU()
+                val (l, u, p) = m.decomposeLUP()
 
                 println("$l\n\n$u\n\n$p\n")
 
@@ -58,7 +57,7 @@ internal class MatrixTest {
                     }
                 }
 
-                assertEquals(m, p * l * u, "fl\n$l\nfu\n$u\n")
+                assertEquals(m, l * u * p, "fl\n$l\nfu\n$u\n")
             } catch (e: LinearDependence) {
                 println(e.message)
                 continue
@@ -71,7 +70,7 @@ internal class MatrixTest {
         for (i in 1..6) {
             val m = randomMatrix(i, i, mode = MatrixMode.mDouble)
             try {
-                val (l, u, p) = m.decomposeLU()
+                val (l, u, p) = m.decomposeLUP()
 
                 println("$l\n\n$u")
 
@@ -97,6 +96,68 @@ internal class MatrixTest {
                 println(e.message)
                 continue
             }
+        }
+    }
+
+    @Test
+    fun testForwardSubstitution() {
+        val a = Matrix("2 0\n2 1")
+        val b = Matrix("3\n6")
+
+        val x = forwardSubstitution(a, b)
+        assertEquals(Matrix("1.5\n3.0"), x)
+    }
+
+    @Test
+    fun testBackwardSubstitution() {
+        val a = Matrix("1 2 \n0 1")
+        val b = Matrix("3\n2")
+
+        val x = backwardSubstitution(a, b)
+        println(x)
+    }
+
+    @Test
+    fun testLinSolve() {
+        for (i in 1..6) {
+            val A = randomMatrix(i, i, mode = MatrixMode.mDouble)
+            val b = randomMatrix(i, 1, mode = MatrixMode.mDouble)
+
+            val x = linSolve(A, b)
+
+            assertEquals(b, (A * x).roundToPrecision())
+        }
+
+        for (i in 1..6) {
+            val A = randomMatrix(i, i, mode = MatrixMode.mFraction)
+            val b = randomMatrix(i, 1, mode = MatrixMode.mFraction)
+
+            val x = linSolve(A, b)
+
+            assertEquals(b, (A * x))
+        }
+    }
+
+    @Test
+    fun testInverse() {
+        for (i in 1..6) {
+            val m = randomMatrix(i, i, mode = MatrixMode.mDouble)
+            val I = identity(i, MatrixMode.mDouble)
+
+            val inv = m.inv()
+
+            assertEquals(I, (m * inv).roundToPrecision())
+            assertEquals(I, (inv * m).roundToPrecision())
+        }
+
+        for (i in 1..6) {
+            val m = randomMatrix(i, i, mode = MatrixMode.mFraction)
+            val I = identity(i, MatrixMode.mFraction)
+
+            val inv = m.inv()
+
+            assertEquals(I, m * inv)
+            assertEquals(I, inv * m)
         }
     }
 
@@ -291,8 +352,8 @@ internal class MatrixTest {
         fm = m2.toFractionMatrix()
         assertEquals("0/1 0/1 0/1\n-1/1 -2/1 3/1\n4/1 8/1 -12/1", fm.toString())
 
-        assertEquals(I, I.decomposeLU().first)
-        assertEquals(I, I.decomposeLU().second)
+        assertEquals(I, I.decomposeLUP().first)
+        assertEquals(I, I.decomposeLUP().second)
 
         var det = I.det()
         assertEquals(1.0, det)

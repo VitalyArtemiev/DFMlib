@@ -69,6 +69,8 @@ class Matrix {
 
     override operator fun equals(other: Any?): Boolean {
         return if (other is Matrix) {
+            require(mode == other.mode) { "Matrix mode mismatch" }
+
             if (other.rows != rows || other.cols != cols)
                 return false
 
@@ -167,6 +169,7 @@ class Matrix {
     }
 
     operator fun plus(m: Matrix): Matrix {
+        require(mode == m.mode) { "Matrix mode mismatch" }
         require(rows == m.rows && cols == m.cols) { "Matrix size mismatch during sum" }
 
         val result = copy()
@@ -189,6 +192,7 @@ class Matrix {
     }
 
     operator fun minus(m: Matrix): Matrix {
+        require(mode == m.mode) { "Matrix mode mismatch" }
         require(rows == m.rows && cols == m.cols) { "Matrix size mismatch during sum" }
 
         val result = copy()
@@ -211,6 +215,7 @@ class Matrix {
     }
 
     operator fun times(m: Matrix): Matrix {
+        require(mode == m.mode) { "Matrix mode mismatch" }
         require(cols == m.rows) { "Matrix dimension mismatch" }
 
         val result = Matrix(rows, m.cols, mode)
@@ -248,7 +253,7 @@ class Matrix {
         }
     }
 
-    fun decomposeLU(): Triple<Matrix, Matrix, Matrix> {
+    fun decomposeLUP(): Triple<Matrix, Matrix, Matrix> {
         require(cols == rows) { "Square matrix required" }
 
         val L = identity(rows, mode)
@@ -295,7 +300,7 @@ class Matrix {
         var pZeroCount = 0
 
         var result = try {
-            val (_, u, p) = decomposeLU()
+            val (_, u, p) = decomposeLUP()
 
             var r = u[0, 0]
             for (i in 1 until cols) {
@@ -323,6 +328,36 @@ class Matrix {
             (result as Double).round(precision)
         } else
             result as Fraction
+    }
+
+    fun inv(): Matrix {
+        val N = rows
+        val IA = Matrix(rows, cols, mode)
+
+        val A = this
+        val (L, U, P) = decomposeLUP()
+
+
+        for (j in 0 until N) {
+            for (i in 0 until N) {
+                IA[i, j] = if (P[i, j] == initNumber(1)) initNumber(1) else initNumber()
+
+                for (k in 0 until i)
+                    IA[i, j] -= L[i, k] * IA[k, j]
+            }
+            for (i in N - 1 downTo 0) {
+                for (k in i + 1 until N)
+                    IA[i, j] -= U[i, k] * IA[k, j]
+
+                IA[i, j] /= U[i, i]
+            }
+        }
+
+        return IA
+    }
+
+    fun pinv() {
+
     }
 
     fun transpose(): Matrix {
@@ -361,4 +396,55 @@ fun identity(size: Int, mode: MatrixMode): Matrix {
         m[i, i] = m.initNumber(1)
     }
     return m
+}
+
+fun forwardSubstitution(LT: Matrix, b: Matrix): Matrix {
+    //todo: require(LT is lower triangular)
+    val x = Matrix(b.rows, 1, b.mode)
+
+    x[0, 0] = b[0, 0] / LT[0, 0]
+
+    for (i in 1 until b.rows) {
+        var s = LT.initNumber()
+        for (j in 0 until i) {
+            s += LT[i, j] * x[j, 0]
+        }
+
+        x[i, 0] = (b[i, 0] - s) / LT[i, i]
+    }
+
+    return x
+}
+
+fun backwardSubstitution(UT: Matrix, b: Matrix): Matrix {
+    //todo: require(UT is upper triangular)
+    val x = Matrix(b.rows, 1, b.mode)
+
+    val m = b.rows - 1
+
+    x[m, 0] = b[m, 0] / UT[m, m]
+
+    for (i in m - 1 downTo 0) {
+        var s = UT.initNumber()
+        for (j in i until UT.cols) {
+            s += UT[i, j] * x[j, 0]
+        }
+
+        x[i, 0] = (b[i, 0] - s) / UT[i, i]
+    }
+
+    return x
+}
+
+fun linSolve(A: Matrix, b: Matrix): Matrix {
+    require(A.mode == b.mode) { "Matrix mode mismatch" }
+    require(A.rows == b.rows) { "Matrix size mismatch" }
+    require(A.rows == A.cols) { "Matrix size mismatch" }
+
+    val (L, U, P) = A.decomposeLUP()
+
+    val y = forwardSubstitution(L, P * b)
+    val x = backwardSubstitution(U, y)
+
+    return x
 }

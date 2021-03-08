@@ -10,7 +10,7 @@ internal class MatrixTestJVM {
         for (i in 1..6) {
             val m = randomMatrix(i, i, mode = MatrixMode.mDouble)
             try {
-                val (l, u, p) = m.decomposeLU()
+                val (l, u, p) = m.decomposeLUP()
 
                 println("$l\n\n$u")
 
