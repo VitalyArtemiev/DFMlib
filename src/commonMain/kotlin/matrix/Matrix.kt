@@ -122,11 +122,25 @@ class Matrix {
             for (j in 0 until cols)
                 s += a[i, j].toString() + ' '
             s = s.dropLast(1)
-
-            if (i != rows - 1)
-                s += '\n'.toString()
+            s += '\n'
         }
+        s = s.dropLast(1)
         return s
+    }
+
+    fun toStringFancy(): String {
+        var s = "\n"
+
+        for (i in 0 until rows) {
+            s += '|'
+
+            for (j in 0 until cols)
+                s += a[i, j].toString() + ' '
+            s = s.dropLast(1)
+
+            s += "|\n"
+        }
+        return s + '\n'
     }
 
     fun toFractionMatrix(): Matrix {
@@ -253,8 +267,8 @@ class Matrix {
         }
     }
 
-    fun decomposeLUP(): Triple<Matrix, Matrix, Matrix> {
-        require(cols == rows) { "Square matrix required" }
+    fun decomposeLUP(): Triple<Matrix, Matrix, Matrix> { //todo: turns out, it's really inefficient to represent this as three matrices - can combine L and U into one, modify p into list
+        require(cols == rows) { "Square matrix required, instead:\n ${this}" }
 
         val L = identity(rows, mode)
 
@@ -336,7 +350,6 @@ class Matrix {
 
         val A = this
         val (L, U, P) = decomposeLUP()
-
 
         for (j in 0 until N) {
             for (i in 0 until N) {
