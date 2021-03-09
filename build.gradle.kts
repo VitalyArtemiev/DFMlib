@@ -45,11 +45,11 @@ kotlin {
     }
 
     sourceSets {
-        val commonMain by getting {
+        val commonMain by getting /*{
             dependencies {
-                implementation(kotlin("std"))
+                implementation(kotlin("stdlib-common"))
             }
-        }
+        }*/
         val commonTest by getting {
             dependencies {
                 implementation(kotlin("test-common"))
@@ -57,7 +57,11 @@ kotlin {
                 implementation(kotlin("test-junit5"))
             }
         }
-        val jvmMain by getting
+        val jvmMain by getting /*{
+            dependencies {
+                implementation(kotlin("stdlib"))
+            }
+        }*/
         val jvmTest by getting {
             dependencies {
                 implementation("org.junit.jupiter:junit-jupiter:5.4.2")

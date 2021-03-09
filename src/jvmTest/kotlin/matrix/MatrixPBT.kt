@@ -2,7 +2,6 @@ package matrix
 
 //import org.assertj.core.api.*
 import net.jqwik.api.*
-import org.assertj.core.api.Assertions.assertThat
 import kotlin.math.sqrt
 import kotlin.test.assertEquals
 
@@ -11,22 +10,7 @@ import kotlin.test.assertEquals
 //import kotlin.test.*
 
 
-internal class PropertyBasedTests {
-    @Property
-    fun absoluteValueOfAllNumbersIsPositive(@ForAll anInteger: Int): Boolean {
-        return Math.abs(anInteger) >= 0
-    }
-
-    @Property
-    fun lengthOfConcatenatedStringIsGreaterThanLengthOfEach(
-        @ForAll string1: String, @ForAll string2: String
-    ) {
-        val conc = string1 + string2
-
-        assertThat(conc.length).isGreaterThan(string1.length)
-        assertThat(conc.length).isGreaterThan(string2.length)
-    }
-
+internal class MatrixPBT {
     @Provide
     fun matrixMemberList(): Arbitrary<List<Int>>? {
         val matrixSizes = Arbitraries.integers().between(1, 6)
@@ -59,18 +43,25 @@ internal class PropertyBasedTests {
     fun inverseIsReversible(@ForAll("matrixMemberList") l: List<Int>) {
         var m = listToMatrix(l)
 
-        /*try {
+        try {
             val inv = m.inv()
 
             val I = identity(m.cols, m.mode)
 
-            assertEquals(I, (m * inv).roundToPrecision())
-            assertEquals(I, (inv * m).roundToPrecision())
+            /*assertThat(I.toStringFancy()).withFailMessage(
+                "Matrices: ${m.toStringFancy()} ${inv.toStringFancy()}"
+            ).isEqualTo((m * inv).roundToPrecision().toStringFancy())
+            assertThat(I.toStringFancy()).withFailMessage(
+                "Matrices: ${inv.toStringFancy()} ${m.toStringFancy()}"
+            ).isEqualTo((inv * m).roundToPrecision().toStringFancy())*/
+
+            assertEquals(I, (m * inv).roundToPrecision(), "Matrices: ${m.toStringFancy()} ${inv.toStringFancy()}")
+            assertEquals(I, (inv * m).roundToPrecision(), "Matrices: ${inv.toStringFancy()} ${m.toStringFancy()}")
         } catch (e: LinearDependence) {
             println(e.message)
-        }*/
+        }
 
-        m = m.toFractionMatrix()
+        /*m = m.toFractionMatrix()
 
         try {
             val inv = m.inv()
@@ -81,6 +72,6 @@ internal class PropertyBasedTests {
             assertEquals(I, (inv * m))
         } catch (e: LinearDependence) {
             println(e.message)
-        }
+        }*/
     }
 }

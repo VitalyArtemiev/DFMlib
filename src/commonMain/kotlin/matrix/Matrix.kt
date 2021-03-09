@@ -284,7 +284,7 @@ class Matrix {
                 }
 
                 if (i == rows) {
-                    throw LinearDependence("Matrix cannot be decomposed:\n$this\n")
+                    throw LinearDependence("Matrix cannot be decomposed:${this.toStringFancy()}")
                 } else {
                     P.swapRow(n, i)
                     A.swapRow(n, i)
