@@ -353,7 +353,7 @@ class Matrix {
 
         for (j in 0 until N) {
             for (i in 0 until N) {
-                IA[i, j] = if (P[i, j] == initNumber(1)) initNumber(1) else initNumber()
+                IA[i, j] = P[i, j]
 
                 for (k in 0 until i)
                     IA[i, j] -= L[i, k] * IA[k, j]
@@ -454,7 +454,9 @@ fun linSolve(A: Matrix, b: Matrix): Matrix {
     require(A.rows == b.rows) { "Matrix size mismatch" }
     require(A.rows == A.cols) { "Matrix size mismatch" }
 
+    println("decompose")
     val (L, U, P) = A.decomposeLUP()
+    println("decompose done")
 
     val y = forwardSubstitution(L, P * b)
     val x = backwardSubstitution(U, y)

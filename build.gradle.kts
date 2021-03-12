@@ -64,7 +64,7 @@ kotlin {
         }*/
         val jvmTest by getting {
             dependencies {
-                implementation("org.junit.jupiter:junit-jupiter:5.4.2")
+                implementation("org.junit.jupiter:junit-jupiter:5.7.1")
                 implementation("net.jqwik:jqwik:${jqwikVersion}")
                 implementation("org.assertj:assertj-core:3.12.2")
                 implementation(kotlin("test-junit5"))

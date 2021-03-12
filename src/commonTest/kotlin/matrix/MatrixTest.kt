@@ -12,13 +12,13 @@ fun randomMatrix (rows: Int, cols: Int, seed: Int = -1, mode: MatrixMode = Matri
 
     var seed = seed
     if (seed == -1) {
-        //seed = Random.nextInt()
+        seed = Random.nextInt()
     }
 
     for (i in 0 until rows)
         for (j in 0 until cols) {
             seed++
-            m[i, j] = m.initNumber(Random(seed).nextInt(-20, 20))
+            m[i, j] = m.initNumber(Random(seed).nextInt(-10, 10))
         }
 
     return m
@@ -36,7 +36,7 @@ internal class MatrixTest {
         assertEquals(m, p * l * u)
     }
 
-    @Test
+          @Test
     fun testGaussFraction () {
         for (i in 1..6) {
             val m = randomMatrix(i, i, mode = MatrixMode.mFraction)
@@ -71,8 +71,6 @@ internal class MatrixTest {
             val m = randomMatrix(i, i, mode = MatrixMode.mDouble)
             try {
                 val (l, u, p) = m.decomposeLUP()
-
-                println("$l\n\n$u")
 
                 val U = u.copy().roundToPrecision() //copy to avoid losing precision in original matrices
                 val L = l.copy().roundToPrecision()
@@ -132,9 +130,16 @@ internal class MatrixTest {
             val A = randomMatrix(i, i, mode = MatrixMode.mFraction)
             val b = randomMatrix(i, 1, mode = MatrixMode.mFraction)
 
+            println(i)
+
             val x = linSolve(A, b)
 
-            assertEquals(b, (A * x))
+            println(i)
+
+            val result = A * x
+
+            assertEquals(b, result)
+            println(i)
         }
     }
 
@@ -144,20 +149,28 @@ internal class MatrixTest {
             val m = randomMatrix(i, i, mode = MatrixMode.mDouble)
             val I = identity(i, MatrixMode.mDouble)
 
-            val inv = m.inv()
+            try {
+                val inv = m.inv()
 
-            assertEquals(I, (m * inv).roundToPrecision())
-            assertEquals(I, (inv * m).roundToPrecision())
+                assertEquals(I, (m * inv).roundToPrecision(), "M: ${m.toStringFancy()} inv: ${inv.toStringFancy()}")
+                assertEquals(I, (inv * m).roundToPrecision(), "M: ${m.toStringFancy()} inv: ${inv.toStringFancy()}")
+            } catch (e: LinearDependence) {
+                print("linear dependence")
+            }
         }
+
 
         for (i in 1..6) {
             val m = randomMatrix(i, i, mode = MatrixMode.mFraction)
             val I = identity(i, MatrixMode.mFraction)
+            try {
+                val inv = m.inv()
 
-            val inv = m.inv()
-
-            assertEquals(I, m * inv)
-            assertEquals(I, inv * m)
+                assertEquals(I, m * inv, "M: ${m.toStringFancy()} inv: ${inv.toStringFancy()}")
+                assertEquals(I, inv * m, "M: ${m.toStringFancy()} inv: ${inv.toStringFancy()}")
+            } catch (e: LinearDependence) {
+                print("linear dependence")
+            }
         }
     }
 
@@ -460,5 +473,56 @@ internal class MatrixTest {
         val det = m1.det()
 
         assertEquals(Fraction(4369152, 1), det)
+    }
+
+    @Test
+    fun zeroTest() {
+        val m1 = Matrix("0 1\n1 0")
+        val (L, U, P) = m1.decomposeLUP()
+        assertEquals(m1, L * U * P)
+
+        val I = identity(m1.rows, m1.mode)
+        assertEquals(I, m1 * m1.inv())
+    }
+
+    @Test
+    fun oneTest() {
+        val m1 = Matrix("1 0 0 0\n0 0 0 1\n0 0 1 0\n1 1 0 0")
+        val (L, U, P) = m1.decomposeLUP()
+
+        assertEquals(m1, L * U * P)
+
+        val I = identity(m1.rows, m1.mode)
+        val inv = m1.inv()
+
+        assertEquals(I, m1 * inv)
+    }
+
+    @Test
+    fun twoTest() {
+        val m1 = Matrix("0 1\n1 1")
+        val (L, U, P) = m1.decomposeLUP()
+
+        assertEquals(m1, P * L * U)
+
+        val I = identity(m1.rows, m1.mode)
+
+        //assertEquals(I, m1 * m1.inv())
+    }
+
+    @Test
+    fun threeTest() {
+        val m1 = Matrix("0 0 1\n1 0 0\n0 1 0")
+        val m2 = Matrix("0 1 0\n0 0 1\n1 0 0")
+        val m = randomMatrix(3, 3)
+        assertEquals(m * m1, m2 * m)
+
+        val (L, U, P) = m1.decomposeLUP()
+
+        //assertEquals(m1, L * U * P)
+
+        val I = identity(m1.rows, m1.mode)
+
+        //assertEquals(I, m1 * m1.inv())
     }
 }

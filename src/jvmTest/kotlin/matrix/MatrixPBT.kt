@@ -14,7 +14,7 @@ internal class MatrixPBT {
     @Provide
     fun matrixMemberList(): Arbitrary<List<Int>>? {
         val matrixSizes = Arbitraries.integers().between(1, 6)
-        val lists = Arbitraries.integers().between(-30, 30).list().ofSize(36)
+        val lists = Arbitraries.integers().between(-10, 10).list().ofSize(36)
 
         return Combinators.combine(matrixSizes, lists).`as` { size, list ->
             list.take(size * size)
@@ -39,11 +39,33 @@ internal class MatrixPBT {
         return Matrix(s)
     }
 
+    var ok  = 0
+
+    var notok  = 0
+
+    @Property
+    fun LUPequalsA(@ForAll("matrixMemberList") l: List<Int>) {
+        var A = listToMatrix(l)
+
+        try {
+            val (L, U, P) = A.decomposeLUP()
+            assertEquals((P * A).roundToPrecision(), (L * U).roundToPrecision(),
+                "Matrices: ${L.toStringFancy()} ${U.toStringFancy()} ${P.toStringFancy()} ")
+            ok++
+        } catch (e: LinearDependence) {
+            notok++
+            println(e.message)
+            println("ok: $ok")
+            println("notok: $notok")
+
+        }
+    }
+
     @Property
     fun inverseIsReversible(@ForAll("matrixMemberList") l: List<Int>) {
         var m = listToMatrix(l)
 
-        try {
+        /*try {
             val inv = m.inv()
 
             val I = identity(m.cols, m.mode)
@@ -59,9 +81,9 @@ internal class MatrixPBT {
             assertEquals(I, (inv * m).roundToPrecision(), "Matrices: ${inv.toStringFancy()} ${m.toStringFancy()}")
         } catch (e: LinearDependence) {
             println(e.message)
-        }
+        }*/
 
-        /*m = m.toFractionMatrix()
+        m = m.toFractionMatrix()
 
         try {
             val inv = m.inv()
@@ -72,6 +94,6 @@ internal class MatrixPBT {
             assertEquals(I, (inv * m))
         } catch (e: LinearDependence) {
             println(e.message)
-        }*/
+        }
     }
 }
