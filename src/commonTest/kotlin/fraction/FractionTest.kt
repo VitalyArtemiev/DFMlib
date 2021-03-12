@@ -1,17 +1,23 @@
 package fraction
 
-import kotlin.test.*
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 internal class FractionTest {
     @Test
     fun overflowTest() {
-        var f = Fraction(Int.MAX_VALUE,1)
+        var f = Fraction(Int.MAX_VALUE, 1)
         f = f + 2
         assertEquals("${Int.MAX_VALUE + 2L}/1", f.toString())
 
         f = Fraction(1, Int.MAX_VALUE)
         f = f / 2
         assertEquals("1/${Int.MAX_VALUE * 2L}", f.toString())
+
+        var f1 = Fraction(1, 5)
+        var f2 = Fraction(1, 6) //looks like addsorted is borked
+        assertEquals(f1, f1 + f2 - f2)
     }
 
     @Test
