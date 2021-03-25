@@ -273,6 +273,10 @@ class Fraction: Number {
             throw NumberFormatException("Division by zero")
         }
 
+        if (handleZero()) {
+            return
+        }
+
         denominator.addSorted(factorize(a.toLong()))
         simplify()
     }

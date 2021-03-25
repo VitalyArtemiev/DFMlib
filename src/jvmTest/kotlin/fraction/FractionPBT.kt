@@ -1,11 +1,8 @@
 package fraction
 
 import net.jqwik.api.*
+import net.jqwik.api.constraints.IntRange
 import org.junit.jupiter.api.Assertions.assertEquals
-
-
-//import org.junit.Assert.*
-//import kotlin.test.*
 
 @PropertyDefaults(afterFailure = AfterFailureMode.SAMPLE_FIRST)
 internal class FractionPBT {
@@ -18,6 +15,16 @@ internal class FractionPBT {
     @Property
     fun sumProps(@ForAll("fraction1") f1: Fraction, @ForAll("fraction1") f2: Fraction) {
         assertEquals(f1, f1 + f2 - f2, "f1: $f1    f2: $f2")
+
+        assertEquals(f1, -(-f1), "f1: $f1 ")
+    }
+
+    @Property
+    fun sumPropsInt(@ForAll("fraction1") f1: Fraction, @ForAll @IntRange(min = -100, max = +100) int: Int) {
+        assertEquals(f1, f1 + int - int, "f1: $f1    int: $int")
+
+        assertEquals(f1 + Fraction(int), f1 + int, "f1: $f1    int: $int")
+        assertEquals(f1 - Fraction(int), f1 - int, "f1: $f1    int: $int")
     }
 
     @Property
@@ -33,6 +40,22 @@ internal class FractionPBT {
         } catch (e: NumberFormatException) {
             println(e.message + "\nf1: $f1    f2: $f2")
         }
+    }
 
+    @Property
+    fun mulPropsInt(@ForAll("fraction1") f1: Fraction, @ForAll @IntRange(min = -100, max = +100) int: Int) {
+        try {
+            assertEquals(f1, f1 * int / int, "f1: $f1    int: $int")
+        } catch (e: NumberFormatException) {
+            println(e.message + "\nf1: $f1    int: $int")
+        }
+
+        assertEquals(f1 * Fraction(int), f1 * int, "f1: $f1    int: $int")
+
+        try {
+            assertEquals(f1 / Fraction(int), f1 / int, "f1: $f1    int: $int")
+        } catch (e: NumberFormatException) {
+            println(e.message + "\nf1: $f1    int: $int")
+        }
     }
 }
