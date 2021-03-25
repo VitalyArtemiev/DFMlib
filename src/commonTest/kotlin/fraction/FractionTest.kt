@@ -6,14 +6,6 @@ import kotlin.test.assertTrue
 
 internal class FractionTest {
     @Test
-    fun stest() {
-        val f1 = Fraction(1)
-        val f2 = Fraction(0)
-        val result = f1 * f2 / f2
-        println(result)
-    }
-
-    @Test
     fun overflowTest() {
         var f = Fraction(Int.MAX_VALUE, 1)
         f = f + 2
