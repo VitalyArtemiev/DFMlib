@@ -1,8 +1,19 @@
 package fraction
 
-import kotlin.test.*
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
 internal class IntListTest {
+    @Test
+    fun stest() {
+        val l1 = IntList(1)
+        val l2 = IntList(0)
+
+        l2.addSorted(l1)
+
+        println("$l2")
+    }
+
     @Test
     fun test() {
         val l = IntList()

@@ -221,6 +221,10 @@ class Fraction: Number {
             throw NumberFormatException("Division by zero")
         }
 
+        if (handleZero()) {
+            return
+        }
+
         numerator.addSorted(f.denominator)
         denominator.addSorted(f.numerator)
 

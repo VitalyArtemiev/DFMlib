@@ -2,7 +2,8 @@ package fraction
 
 class IntList(vararg values: Int) {
     init {
-        for (value in values) {
+
+        for (value in values.sorted()) {
             add(value)
         }
     }
@@ -59,6 +60,9 @@ class IntList(vararg values: Int) {
 
         result.memberCount = memberCount
         return result
+        //val arr = toArray().toIntArray()
+
+        //return IntList(*arr)
     }
 
     internal fun add(v: Int) {
@@ -78,6 +82,7 @@ class IntList(vararg values: Int) {
     internal fun addSorted(v: Int) {
         if (root == null) {
             root = IntMember(v)
+            memberCount++
         } else {
             memberCount++
             prodReady = false
@@ -99,23 +104,37 @@ class IntList(vararg values: Int) {
     }
 
     internal fun addSorted(list: IntList) {
-        val l = list.copy()
-
-        if (l.memberCount == 0)
+        if (list.memberCount == 0)
             return
+
+        val l = list.copy()
 
         if (root == null) {
             root = l.root
         } else {
             var curL = l.root
+            var prevL = curL
             var cur = root
 
-            while (curL != null && root!!.value >= curL.value) { //add all elements smaller than current root to beginning
+            var flag = false
+            while (curL != null && root!!.value >= curL.value) {
+                flag = true
+                prevL = curL
+                curL = curL.next
+            }
+
+            if (flag) {
+                prevL!!.next = root
+                root = l.root
+            }
+
+
+            /*while (curL != null && root!!.value >= curL.value) { //add all elements smaller than current root to beginning
                 val t = curL
                 curL = curL.next
                 t.next = root
                 root = t
-            }
+            }*/
 
             while (curL != null) {//add the rest interspersed in current list
                 while (cur!!.next != null && cur.next!!.value < curL.value) {
@@ -126,6 +145,7 @@ class IntList(vararg values: Int) {
                 curL = curL.next
             }
         }
+
         memberCount += l.memberCount
         prodReady = false
     }
@@ -174,5 +194,14 @@ class IntList(vararg values: Int) {
         }
 
         return result
+    }
+
+    fun toArray(): Array<Int> {
+        var cur: IntMember? = root ?: return emptyArray()
+        return Array(memberCount) {
+            val v = cur
+            cur = cur?.next
+            v!!.value
+        }
     }
 }
