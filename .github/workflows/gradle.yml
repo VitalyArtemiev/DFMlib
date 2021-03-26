@@ -4,8 +4,10 @@
 name: Kotlin Multiplatform CI with Gradle
 
 on:
-  push:
+  workflow_dispatch:
     branches: [ master ]
+  #push:
+    #branches: [ master ]
   pull_request:
     branches: [ master ]
 
@@ -24,5 +26,8 @@ jobs:
       run: chmod +x gradlew
     - name: Build with Gradle
       run: ./gradlew build -x allTests -x check -x jsBrowserTest -x jsTest -x jvmTest -x nativeTest
-    - name: Test with Gradle
+    - name: JVM test with Gradle
       run: ./gradlew jvmTest
+    - name: Kotlin-Native test with Gradle
+      run: ./gradlew nativeTest
+
