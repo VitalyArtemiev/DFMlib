@@ -2,6 +2,7 @@ package matrix
 
 //import org.assertj.core.api.*
 import net.jqwik.api.*
+import net.jqwik.api.constraints.IntRange
 import kotlin.math.sqrt
 import kotlin.test.assertEquals
 
@@ -35,32 +36,82 @@ internal class MatrixPBT {
     }
 
     @Provide
-    fun matrixPair(): Arbitrary<Pair<Matrix, Matrix>> {
-        return Combinators.combine(matrix(), matrix()).`as` { m1, m2 -> Pair(m1, m2) }
-    }
+    fun matrixPairSameSize(): Arbitrary<Pair<Matrix, Matrix>> {
+        val matrixRows = Arbitraries.integers().between(1, 6)
+        val matrixCols = Arbitraries.integers().between(1, 6)
 
-    @Property(tries = 10000)
-    fun commutative(@ForAll("matrix") a: Matrix, @ForAll("matrix") b: Matrix) {
-        if (a.rows == b.rows && a.cols == b.cols) {
-            assertEquals(a, a + b - b)
-            assertEquals(b, b - a + a)
-
-            val fa = a.toFractionMatrix()
-            val fb = b.toFractionMatrix()
-
-            assertEquals(fa, fa + fb - fb)
-            assertEquals(fb, fb - fa + fa)
+        val lists = Arbitraries.integers().between(-10, 10).list().ofSize(36 * 2)
+        var curCols = 0
+        var curRows = 0
+        return Combinators.combine(matrixRows, matrixCols, lists).`as` { rows, cols, list ->
+            curCols = cols
+            curRows = rows
+            list.take(rows * cols * 2)
+        }.map { list ->
+            Pair(
+                listToMatrix(list.take(curCols * curRows), curCols),
+                listToMatrix(list.takeLast(curCols * curRows), curCols)
+            )
         }
     }
 
     @Property
+    fun commutative(@ForAll("matrixPairSameSize") p: Pair<Matrix, Matrix>) {
+        val (a, b) = p
+        assertEquals(a, a + b - b)
+        assertEquals(b, b - a + a)
+
+        val fa = a.toFractionMatrix()
+        val fb = b.toFractionMatrix()
+
+        assertEquals(fa, fa + fb - fb)
+        assertEquals(fb, fb - fa + fa)
+    }
+
+    @Property
+    fun distributive(@ForAll("matrixPairSameSize") p: Pair<Matrix, Matrix>) {
+        val (a, b) = p
+        assertEquals(a + b, b + a)
+        assertEquals(-a + b, b - a)
+
+        val fa = a.toFractionMatrix()
+        val fb = b.toFractionMatrix()
+
+        assertEquals(fa + fb, fb + fa)
+        assertEquals(-fa + fb, fb - fa)
+    }
+
+    @Property
+    fun swapRowIsReversible(
+        @ForAll("matrix") m: Matrix,
+        @ForAll @IntRange(min = 0, max = 5) i1: Int,
+        @ForAll @IntRange(min = 0, max = 5) i2: Int
+    ) {
+        val row1 = i1 % m.rows
+        val row2 = i2 % m.rows
+        val o = m.copy()
+        m.swapRow(row1, row2)
+        m.swapRow(row1, row2)
+        assertEquals(o, m)
+    }
+
+    var ok = 0
+    var okp = 0
+
+    @Property
     fun LUPequalsA(@ForAll("squareMatrix") A: Matrix) {
+        val I = identity(A.cols, A.mode)
         try {
             val (L, U, P) = A.decomposeLUP()
             assertEquals(
                 (P * A).roundToPrecision(), (L * U).roundToPrecision(),
-                "Matrices: ${L.toStringFancy()} ${U.toStringFancy()} ${P.toStringFancy()} "
+                "Matrices: L ${L.toStringFancy()} U ${U.toStringFancy()} P ${P.toStringFancy()} A ${A.toStringFancy()} "
             )
+            println("ok ${ok++} ")
+            if (P != I) {
+                println("okp ${okp++} ")
+                println("Matrices: L ${L.toStringFancy()} U ${U.toStringFancy()} P ${P.toStringFancy()} A ${A.toStringFancy()} ")
+            }
         } catch (e: LinearDependence) {
             println(e.message)
         }

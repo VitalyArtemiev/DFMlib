@@ -277,9 +277,9 @@ class Matrix {
         val P = identity(rows, mode)
 
         for (n in 0 until rows) {
-            if (A[n, n] == initNumber()) {
+            if (A[n, n].isZero()) {
                 var i = n + 1
-                while (i < rows && A[i, n] == initNumber()) {
+                while (i < rows && A[i, n].isZero()) {
                     i++
                 }
 
@@ -318,7 +318,7 @@ class Matrix {
 
             var r = u[0, 0]
             for (i in 1 until cols) {
-                if (p[i, i] == initNumber()) {
+                if (p[i, i].isZero()) {
                     pZeroCount++ //counting number of zeros on main diagonal
                 }
                 r *= u[i, i]
