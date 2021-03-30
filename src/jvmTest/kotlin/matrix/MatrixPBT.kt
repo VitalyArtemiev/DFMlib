@@ -95,23 +95,28 @@ internal class MatrixPBT {
         assertEquals(o, m)
     }
 
-    var ok = 0
-    var okp = 0
-
     @Property
-    fun LUPequalsA(@ForAll("squareMatrix") A: Matrix) {
+    fun pTransposeIsInverse(@ForAll("squareMatrix") A: Matrix) {
         val I = identity(A.cols, A.mode)
         try {
             val (L, U, P) = A.decomposeLUP()
             assertEquals(
-                (P * A).roundToPrecision(), (L * U).roundToPrecision(),
+                I, P * P.transpose(),
                 "Matrices: L ${L.toStringFancy()} U ${U.toStringFancy()} P ${P.toStringFancy()} A ${A.toStringFancy()} "
             )
-            println("ok ${ok++} ")
-            if (P != I) {
-                println("okp ${okp++} ")
-                println("Matrices: L ${L.toStringFancy()} U ${U.toStringFancy()} P ${P.toStringFancy()} A ${A.toStringFancy()} ")
-            }
+        } catch (e: LinearDependence) {
+            println(e.message)
+        }
+    }
+
+    @Property
+    fun LUPequalsA(@ForAll("squareMatrix") A: Matrix) {
+        try {
+            val (L, U, P) = A.decomposeLUP()
+            assertEquals(
+                A, (P.transpose() * L * U).roundToPrecision(),
+                "Matrices: L ${L.toStringFancy()} U ${U.toStringFancy()} P ${P.toStringFancy()} A ${A.toStringFancy()} "
+            )
         } catch (e: LinearDependence) {
             println(e.message)
         }

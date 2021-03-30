@@ -534,4 +534,27 @@ internal class MatrixTest {
 
         //assertEquals(I, m1 * m1.inv())
     }
+
+    @Test
+    fun pivotTest() {
+        val m = Matrix(
+            "0.0 0.0 1.0\n" +
+                    "1.0 0.0 0.0\n" +
+                    "1.0 1.0 0.0"
+        )
+
+        val (L, U, P) = m.decomposeLUP()
+
+        assertEquals(P * m, L * U, printMatrices(P, L, U, m))
+
+    }
+
+    @Test
+    fun testPrint() {
+        printMatrices(
+            identity(3, MatrixMode.mFraction),
+            identity(4, MatrixMode.mDouble),
+            identity(5, MatrixMode.mFraction)
+        )
+    }
 }

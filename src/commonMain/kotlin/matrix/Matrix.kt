@@ -274,7 +274,7 @@ class Matrix {
 
         var A = copy()
 
-        val P = identity(rows, mode)
+        var P = identity(rows, mode)
 
         for (n in 0 until rows) {
             if (A[n, n].isZero()) {
@@ -286,7 +286,11 @@ class Matrix {
                 if (i == rows) {
                     throw LinearDependence("Matrix cannot be decomposed:${this.toStringFancy()}")
                 } else {
+                    //val newP = identity(rows, mode)
+                    //new
                     P.swapRow(n, i)
+                    //P = newP * P
+
                     A.swapRow(n, i)
                 }
             }
@@ -462,4 +466,30 @@ fun linSolve(A: Matrix, b: Matrix): Matrix {
     val x = backwardSubstitution(U, y)
 
     return x
+}
+
+fun printMatrices(vararg matrices: Matrix): String {
+    var result = "\n"
+    var maxRow = 0
+    for (m in matrices) {
+        if (m.rows > maxRow) {
+            maxRow = m.rows
+        }
+    }
+
+    for (i in 0 until maxRow) {
+        for (m in matrices) {
+            if (i < m.rows) {
+                var s = ""
+                for (j in 0 until m.cols) {
+                    s += m[i, j].toString() + " "
+                }
+                result += s + "\t"
+            } else {
+                result += "    ".repeat(m.cols) + "\t"
+            }
+        }
+        result += "\n"
+    }
+    return result + "\n"
 }
