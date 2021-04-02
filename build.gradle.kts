@@ -1,6 +1,6 @@
 plugins {
     kotlin("multiplatform") version "1.4.31"
-    `maven-publish`
+    `maven`
 }
 
 group = "me.vital"
