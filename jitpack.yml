@@ -1,5 +1,2 @@
 install:
-  - echo "Running a custom install command"
-  - ./gradlew build -x allTests -x jsBrowserTest -x jsTest -x jvmTest -x nativeTest
-  - echo "Build successful"
-  - ./gradlew publishToMavenLocal
+  - ./gradlew clean install -xtest
