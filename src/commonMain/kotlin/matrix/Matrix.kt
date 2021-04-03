@@ -388,8 +388,23 @@ class Matrix {
         return result
     }
 
+    fun sum(): Number {
+        var sum = initNumber()
+        for (i in 0 until rows) {
+            for (j in 0 until cols) {
+                sum += this[i, j]
+            }
+        }
+
+        return sum
+    }
+
+    fun mean(): Number {
+        return sum() / (rows * cols)
+    }
+
     fun roundToPrecision(): Matrix {
-        if (mode == MatrixMode.mFraction){
+        if (mode == MatrixMode.mFraction) {
             return this
         }
 
