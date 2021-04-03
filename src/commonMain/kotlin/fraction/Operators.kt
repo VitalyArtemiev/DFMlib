@@ -22,6 +22,12 @@ operator fun Number.minus(a: Number): Number {
     if (this is Double && a is Double)
         return this - a
 
+    if (this is Fraction && a is Int)
+        return this - a
+
+    if (this is Double && a is Int)
+        return this - a
+
     throw Exception("Not implemented")
 }
 
@@ -34,6 +40,12 @@ operator fun Number.plus(a: Number): Number {
         return this + a
 
     if (this is Double && a is Double)
+        return this + a
+
+    if (this is Fraction && a is Int)
+        return this + a
+
+    if (this is Double && a is Int)
         return this + a
 
     throw Exception("Not implemented")
@@ -68,6 +80,12 @@ operator fun Number.div(a: Number): Number {
         return this / a
 
     if (this is Double && a is Double)
+        return this / a
+
+    if (this is Fraction && a is Int)
+        return this / a
+
+    if (this is Double && a is Int)
         return this / a
 
     throw Exception("Not implemented")
