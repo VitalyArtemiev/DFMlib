@@ -11,7 +11,69 @@ import kotlin.math.sign
 /**
  * @author Виталий
  */
-class Fraction: Number {
+
+const val targetSize = 256
+
+class MyHashMap(val m: HashMap<Long, IntArray>) : MutableMap<Long, IntArray> by m {
+    val log = hashMapOf<Long, Int>()
+
+    fun trim() {
+        var sorted = log.asSequence().sortedBy { it.value }
+        sorted = sorted.take(sorted.count() - targetSize)
+
+        for ((key, _) in sorted) {
+            m.remove(key)
+        }
+    }
+
+    override fun get(key: Long): IntArray? {
+        if (log[key] != null) {
+            log[key]!!.inc()
+        } else {
+            log[key] = 1
+        }
+        return m[key]
+    }
+
+    override fun put(key: Long, value: IntArray): IntArray? {
+        if (log[key] != null) {
+            log[key]!!.inc()
+        } else {
+            log[key] = 1
+        }
+        return m.put(key, value)
+    }
+}
+
+val factorCache = MyHashMap(HashMap(targetSize))
+val maxCacheCapacity = 512
+
+fun factorizeCached(n: Long): IntArray {
+    if (n in factorCache) {
+        return factorCache[n]!!
+    } else {
+        var n = n
+        val factors = ArrayList<Int>(4)
+        var i = 2
+        while (i <= n / i) {
+            while (n % i == 0L) {
+                factors.add(i)
+                n /= i
+            }
+            i++
+        }
+        val result = factors.toIntArray()
+
+        factorCache[n] = result
+        if (factorCache.size > maxCacheCapacity) {
+            factorCache.trim()
+        }
+
+        return result
+    }
+}
+
+class Fraction : Number {
     override fun toChar(): Char {
         return 'f'
     }
@@ -99,28 +161,9 @@ class Fraction: Number {
         if (sign == 0)
             sign = 1
 
-        var n = abs(number)
+        val factors = factorizeCached(abs(number))
 
-        val factors = IntList()
-        var i = 2
-        while (i <= n / i) {
-            while (n % i == 0L) {
-                factors.add(i)
-                n /= i
-            }
-            i++
-        }
-
-        /*for (i in 2..(n / i)) {
-            while (n % i == 0) {
-                factors.add(i)
-                n /= i
-            }
-        }*/
-        if (n > 1) {
-            factors.add(n.toInt())//todo: potential conversion problem
-        }
-        return factors
+        return IntList(*factors)
     }
 
     fun copy(): Fraction {

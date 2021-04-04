@@ -2,7 +2,6 @@ package fraction
 
 class IntList(vararg values: Int) {
     init {
-
         for (value in values.sorted()) {
             add(value)
         }
