@@ -1,5 +1,5 @@
 plugins {
-    kotlin("multiplatform") version "1.4.31"
+    kotlin("multiplatform") version "1.4.32"
     `maven-publish`
 }
 
@@ -46,11 +46,11 @@ kotlin {
     }
 
     sourceSets {
-        val commonMain by getting /*{
-            dependencies {
+        val commonMain by getting {
+            /*dependencies {
                 implementation(kotlin("stdlib-common"))
-            }
-        }*/
+            }*/
+        }
         val commonTest by getting {
             dependencies {
                 implementation(kotlin("test-common"))
@@ -58,11 +58,11 @@ kotlin {
                 implementation(kotlin("test-junit5"))
             }
         }
-        val jvmMain by getting /*{
+        val jvmMain by getting {
             dependencies {
                 implementation(kotlin("stdlib"))
             }
-        }*/
+        }
         val jvmTest by getting {
             dependencies {
                 implementation("org.junit.jupiter:junit-jupiter:5.7.1")

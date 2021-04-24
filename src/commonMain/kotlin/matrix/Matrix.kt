@@ -34,14 +34,16 @@ class Matrix {
     constructor(s: String) {
         val lines = s.dropLastWhile { it == '\n' }.split("\n")
         rows = lines.size
-        cols = lines[0].dropLastWhile { it == '\t' || it == ' ' }.split(" ", "\t").size
+        cols = lines[0].dropLastWhile { it == '\t' || it == ' ' }
+            .replace("\\s+".toRegex(), " ").split(" ", "\t").size
 
         if (s.contains("/")) {
             mode = MatrixMode.mFraction
             a = Array2DFraction(rows, cols)
 
             for ((i, line) in lines.withIndex()) {
-                val elements = line.dropLastWhile { it == '\t' || it == ' ' }.split(" ", "\t")
+                val elements = line.dropLastWhile { it == '\t' || it == ' ' }
+                    .replace("\\s+".toRegex(), " ").split(" ", "\t")
 
                 if (elements.size != cols)
                     throw MatrixException("Invalid matrix: malformed columns")
@@ -55,7 +57,8 @@ class Matrix {
             a = Array2DDouble(rows, cols)
 
             for ((i, line) in lines.withIndex()) {
-                val elements = line.dropLastWhile { it == '\t' || it == ' ' }.split(" ", "\t")
+                val elements = line.dropLastWhile { it == '\t' || it == ' ' }
+                    .replace("\\s+".toRegex(), " ").split(" ", "\t")
 
                 if (elements.size != cols)
                     throw MatrixException("Invalid matrix: malformed columns")
@@ -320,8 +323,8 @@ class Matrix {
         var result = try {
             val (_, u, p) = decomposeLUP()
 
-            var r = u[0, 0]
-            for (i in 1 until cols) {
+            var r = initNumber(1)
+            for (i in 0 until cols) {
                 if (p[i, i].isZero()) {
                     pZeroCount++ //counting number of zeros on main diagonal
                 }
@@ -378,7 +381,7 @@ class Matrix {
     }
 
     fun transpose(): Matrix {
-        val result = Matrix(cols, rows)
+        val result = Matrix(cols, rows, mode)
 
         for (i in 0 until result.rows) {
             for (j in 0 until result.cols) {

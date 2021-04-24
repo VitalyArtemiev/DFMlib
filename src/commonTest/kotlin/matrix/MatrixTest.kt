@@ -476,6 +476,17 @@ internal class MatrixTest {
     }
 
     @Test
+    fun fractionFromString() {
+        val m = Matrix(
+            "1/2 3   4 5 8    \n" +
+                    "6/12 4 8 9 7\n" +
+                    "-3/7 8 5 2 3\n" +
+                    "-2 6 7 8 0\n" +
+                    "1 2 3 4 5"
+        )
+    }
+
+    @Test
     fun zeroTest() {
         val m1 = Matrix("0 1\n1 0")
         val (L, U, P) = m1.decomposeLUP()
@@ -533,6 +544,13 @@ internal class MatrixTest {
         val I = identity(m1.rows, m1.mode)
 
         //assertEquals(I, m1 * m1.inv())
+    }
+
+    @Test
+    fun swapDetTest() {
+        val A = Matrix("0 1 0\n0 0 1\n1 0 0")
+        val d = A.det()
+        println(d)
     }
 
     @Test

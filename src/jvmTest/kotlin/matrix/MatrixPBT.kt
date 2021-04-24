@@ -1,11 +1,12 @@
 package matrix
 
 //import org.assertj.core.api.*
+import fraction.isZero
+import fraction.unaryMinus
 import net.jqwik.api.*
 import net.jqwik.api.constraints.IntRange
 import kotlin.math.sqrt
 import kotlin.test.assertEquals
-
 
 //import org.junit.Assert.*
 //import kotlin.test.*
@@ -99,6 +100,10 @@ internal class MatrixPBT {
     fun pTransposeIsInverse(@ForAll("squareMatrix") A: Matrix) {
         val I = identity(A.cols, A.mode)
         try {
+            val a = Triple(1, 2, 3)
+
+            val (b, c, d) = a
+
             val (L, U, P) = A.decomposeLUP()
             assertEquals(
                 I, P * P.transpose(),
@@ -117,6 +122,33 @@ internal class MatrixPBT {
                 A, (P.transpose() * L * U).roundToPrecision(),
                 "Matrices: L ${L.toStringFancy()} U ${U.toStringFancy()} P ${P.toStringFancy()} A ${A.toStringFancy()} "
             )
+        } catch (e: LinearDependence) {
+            println(e.message)
+        }
+    }
+
+    @Property
+    fun swapRowChangesDetSign(
+        @ForAll("squareMatrix") A: Matrix,
+        @ForAll @IntRange(min = 0, max = 5) i1: Int,
+        @ForAll @IntRange(min = 0, max = 5) i2: Int
+    ) {
+        try {
+            val row1 = i1 % A.rows
+            val row2 = i2 % A.rows
+            val d1 = A.det()
+            val original = A.copy()
+            A.swapRow(row1, row2)
+            val d2 = A.det()
+            if (d1.isZero() || A.rows == 1 || row1 == row2) {
+                assertEquals(
+                    d1, d2, "Matrices: ${printMatrices(original, A)}\n Det1: $d1 ; Det2: $d2"
+                )
+            } else {
+                assertEquals(
+                    -d1, d2, "Matrices: ${printMatrices(original, A)}\n Det1: $d1 ; Det2: $d2"
+                )
+            }
         } catch (e: LinearDependence) {
             println(e.message)
         }

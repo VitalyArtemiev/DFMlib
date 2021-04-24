@@ -516,7 +516,7 @@ class Fraction : Number {
                     Fraction(s.toInt())
                 }
             } catch (e: NumberFormatException) {
-                throw NumberFormatException("Malformed fraction")
+                throw NumberFormatException("Malformed fraction: '$s'")
             }
         }
     }
