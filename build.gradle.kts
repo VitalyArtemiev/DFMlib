@@ -6,7 +6,7 @@ plugins {
 group = "me.vital"
 version = "1.0-SNAPSHOT"
 
-val jqwikVersion = "1.5.0"
+val jqwikVersion = "1.5.1"
 
 repositories {
     mavenCentral()
@@ -18,7 +18,7 @@ dependencies {
 kotlin {
     jvm {
         compilations.all {
-            kotlinOptions.jvmTarget = "1.8"
+            kotlinOptions.jvmTarget = "14"
         }
         testRuns["test"].executionTask.configure {
             useJUnitPlatform {
@@ -47,9 +47,9 @@ kotlin {
 
     sourceSets {
         val commonMain by getting {
-            /*dependencies {
-                implementation(kotlin("stdlib-common"))
-            }*/
+            dependencies {
+                implementation(kotlin("stdlib-common")) //this prevents code inspection bugs
+            }
         }
         val commonTest by getting {
             dependencies {
@@ -60,14 +60,15 @@ kotlin {
         }
         val jvmMain by getting {
             dependencies {
-                implementation(kotlin("stdlib"))
+                implementation(kotlin("stdlib")) //this prevents code inspection bugs
             }
         }
         val jvmTest by getting {
             dependencies {
+                implementation(kotlin("stdlib")) //this prevents code inspection bugs
                 implementation("org.junit.jupiter:junit-jupiter:5.7.1")
                 implementation("net.jqwik:jqwik:${jqwikVersion}")
-                implementation("org.assertj:assertj-core:3.12.2")
+                implementation("org.assertj:assertj-core:3.19.0")
                 implementation(kotlin("test-junit5"))
             }
         }

@@ -83,6 +83,14 @@ internal class MatrixPBT {
     }
 
     @Property
+    fun transposeIsReversible(@ForAll("matrix") m: Matrix) {
+        assertEquals(m, m.transpose().transpose())
+
+        val f = m.toFractionMatrix()
+        assertEquals(f, f.transpose().transpose())
+    }
+
+    @Property
     fun swapRowIsReversible(
         @ForAll("matrix") m: Matrix,
         @ForAll @IntRange(min = 0, max = 5) i1: Int,
@@ -100,10 +108,6 @@ internal class MatrixPBT {
     fun pTransposeIsInverse(@ForAll("squareMatrix") A: Matrix) {
         val I = identity(A.cols, A.mode)
         try {
-            val a = Triple(1, 2, 3)
-
-            val (b, c, d) = a
-
             val (L, U, P) = A.decomposeLUP()
             assertEquals(
                 I, P * P.transpose(),
