@@ -59,9 +59,6 @@ class IntList(vararg values: Int) {
 
         result.memberCount = memberCount
         return result
-        //val arr = toArray().toIntArray()
-
-        //return IntList(*arr)
     }
 
     internal fun add(v: Int) {
@@ -126,14 +123,6 @@ class IntList(vararg values: Int) {
                 prevL!!.next = root
                 root = l.root
             }
-
-
-            /*while (curL != null && root!!.value >= curL.value) { //add all elements smaller than current root to beginning
-                val t = curL
-                curL = curL.next
-                t.next = root
-                root = t
-            }*/
 
             while (curL != null) {//add the rest interspersed in current list
                 while (cur!!.next != null && cur.next!!.value < curL.value) {

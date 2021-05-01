@@ -1,10 +1,24 @@
 package fraction
 
+import kotlin.math.absoluteValue
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 internal class FractionTest {
+    @Test
+    fun factorizeTest() {
+        val f = 1234567890L.absoluteValue
+        var l = factorize(f)
+        println(l)
+    }
+    @Test
+    fun factorizeCachedTest() {
+        val f = 1234567890L.absoluteValue
+        var l = factorizeCached(f)
+        println(l.toList())
+    }
+
     @Test
     fun overflowTest() {
         var f = Fraction(Int.MAX_VALUE, 1)

@@ -28,7 +28,7 @@ internal class IntListPBT {
     }
 
     @Property
-    fun memberCountCountsMembers(@ForAll @Size(max = 50) list: List<Int>) {
+    fun memberCountCountsMembers(@ForAll @Size(max = 100) list: List<Int>) {
         val intList = IntList()
 
         assertEquals(0, intList.memberCount)

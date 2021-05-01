@@ -144,6 +144,12 @@ fun Double.round(precision: Int): Double {
 
 fun abs(a: Number): Number {
     return when (a) {
+        is Int -> {
+            abs(a)
+        }
+        is Long -> {
+            abs(a)
+        }
         is Double -> {
             abs(a)
         }

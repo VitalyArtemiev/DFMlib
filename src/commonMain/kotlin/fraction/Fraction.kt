@@ -12,68 +12,68 @@ import kotlin.math.sign
  * @author Виталий
  */
 
-const val targetSize = 256
+fun factorize(number: Long): IntList {
+    var n = abs(number)
 
-class MyHashMap(val m: HashMap<Long, IntArray>) : MutableMap<Long, IntArray> by m {
-    val log = hashMapOf<Long, Int>()
-
-    fun trim() {
-        var sorted = log.asSequence().sortedBy { it.value }
-        sorted = sorted.take(sorted.count() - targetSize)
-
-        for ((key, _) in sorted) {
-            m.remove(key)
+    val factors = IntList()
+    var i = 2
+    while (i <= n / i) {
+        while (n % i == 0L) {
+            factors.add(i)
+            n /= i
         }
+        i++
     }
 
-    override fun get(key: Long): IntArray? {
-        if (log[key] != null) {
-            log[key]!!.inc()
-        } else {
-            log[key] = 1
-        }
-        return m[key]
+    if (n > 1) {
+        factors.add(n.toInt())//todo: potential conversion problem
     }
-
-    override fun put(key: Long, value: IntArray): IntArray? {
-        if (log[key] != null) {
-            log[key]!!.inc()
-        } else {
-            log[key] = 1
-        }
-        return m.put(key, value)
-    }
+    return factors
 }
 
-val factorCache = MyHashMap(HashMap(targetSize))
-val maxCacheCapacity = 512
+val factorCache = AccessOrderHashMap(512)
+val maxCacheCapacity = 1024
 
-fun factorizeCached(n: Long): IntArray {
-    if (n in factorCache) {
-        return factorCache[n]!!
+fun factorizeCached(num: Long): IntArray {
+    if (num in factorCache) {
+        return factorCache[num]!!
     } else {
-        var n = n
-        val factors = ArrayList<Int>(4)
+        var n = abs(num)
+
+        val factors = ArrayList<Int>()
         var i = 2
         while (i <= n / i) {
             while (n % i == 0L) {
                 factors.add(i)
                 n /= i
+
+                if (n in factorCache) {
+                    factors.addAll(factorCache[n]!!.toTypedArray())
+
+                    val result = factors.toIntArray()
+                    factorCache[num] = result
+                    return result
+                }
             }
             i++
         }
+
+        if (n > 1) {
+            factors.add(n.toInt())//todo: potential conversion problem
+        }
+
         val result = factors.toIntArray()
 
-        factorCache[n] = result
-        if (factorCache.size > maxCacheCapacity) {
+        factorCache[num] = result
+        /*if (factorCache.size > maxCacheCapacity) {
             factorCache.trim()
-        }
+        }*/
 
         return result
     }
 }
 
-class Fraction : Number {
+class Fraction : Number, Comparable<Number> {
     override fun toChar(): Char {
         return 'f'
     }
@@ -161,7 +161,7 @@ class Fraction : Number {
         if (sign == 0)
             sign = 1
 
-        val factors = factorizeCached(abs(number))
+        val factors = factorizeCached(number)
 
         return IntList(*factors)
     }
@@ -199,17 +199,13 @@ class Fraction : Number {
             num *= -1
             sign *= -1
         }
-        //numerator.addSorted(-1);
-        //simplify(); todo: possible error
     }
 
     operator fun unaryMinus(): Fraction {
         val result = copy()
-        //System.out.println("un0 " + result.toString())
         with(result) {
             negate()
         }
-        //System.out.println("un1 " + result.toString())
         return result
     }
 
@@ -430,7 +426,6 @@ class Fraction : Number {
         while (cn != null) {
             while (cd != null && cd.value < cn.value) {
                 if (cd.value < 0) {
-                    //sign *= -1; no need
                     cd.value = abs(cd.value)
                 }
 
@@ -443,7 +438,6 @@ class Fraction : Number {
             }
 
             if (cn.value < 0) {
-                //sign *= -1; no need
                 cn.value = abs(cn.value)
             }
 
@@ -505,7 +499,7 @@ class Fraction : Number {
                 return if (s.contains("/")) {
                     val elements = s.split("/").toTypedArray()
                     if (elements.size > 2)
-                        throw NumberFormatException("Malformed fraction")
+                        throw NumberFormatException("Malformed fraction: '$s'")
 
                     val n: Int
                     val d: Int
@@ -518,6 +512,29 @@ class Fraction : Number {
             } catch (e: NumberFormatException) {
                 throw NumberFormatException("Malformed fraction: '$s'")
             }
+        }
+    }
+
+    operator fun compareTo(other: Int): Int {
+        return (num * sign).compareTo(den * other)
+    }
+
+    operator fun compareTo(other: Double): Int {
+        return other.compareTo(num.toDouble()/den)
+    }
+
+    operator fun compareTo(other: Fraction): Int {
+        val dif = this - other
+        return dif.num.toInt() * dif.sign
+    }
+
+    override operator fun compareTo(other: Number): Int {
+        return when(other) {
+            is Fraction -> compareTo(other)
+            is Int -> compareTo(other)
+            is Double -> compareTo(other)
+
+            else -> throw NotImplementedError()
         }
     }
 }
